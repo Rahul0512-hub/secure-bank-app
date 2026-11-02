@@ -153,3 +153,17 @@ backups/
 *.dump
 *.backup
 *.sql.gz
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
