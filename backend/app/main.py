@@ -1,5 +1,7 @@
 from fastapi import FastAPI
 
+from backend.app.accounts import router as accounts_router
+
 from backend.app.auth import router as auth_router
 from backend.app.mongodb import get_mongo_client
 from backend.app.postgres import get_postgres_connection
@@ -11,6 +13,7 @@ app = FastAPI(
 )
 
 app.include_router(auth_router)
+app.include_router(accounts_router)
 
 
 @app.get("/")
