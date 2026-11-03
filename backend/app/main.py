@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from backend.app.auth import router as auth_router
 from backend.app.mongodb import get_mongo_client
 from backend.app.postgres import get_postgres_connection
 
@@ -8,6 +9,8 @@ app = FastAPI(
     description="Backend API for the SecureBank application",
     version="1.0.0",
 )
+
+app.include_router(auth_router)
 
 
 @app.get("/")
