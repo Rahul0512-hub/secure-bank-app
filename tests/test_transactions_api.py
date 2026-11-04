@@ -1,4 +1,4 @@
-﻿import unittest
+import unittest
 from decimal import Decimal
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
@@ -191,7 +191,7 @@ class TestTransactionsAPI(unittest.TestCase):
 
         query, params = connection.execute.call_args_list[1].args
         self.assertIn("public.transfer_funds", query)
-        self.assertEqual(params, (10, 20, Decimal("100.0000"), "Transfer", "Test transfer"))
+        self.assertEqual(params, (1010, 10, 20, Decimal("100.0000"), "Transfer", "Test transfer"))
 
     @patch("backend.app.transactions.get_postgres_connection")
     def test_transfer_database_error_returns_safe_response(self, mock_db):

@@ -63,6 +63,7 @@ TO securebank_transfer;
 ALTER FUNCTION public.transfer_funds(
     BIGINT,
     BIGINT,
+    BIGINT,
     NUMERIC,
     VARCHAR,
     TEXT
@@ -75,6 +76,7 @@ ALTER FUNCTION public.transfer_funds(
 ALTER FUNCTION public.transfer_funds(
     BIGINT,
     BIGINT,
+    BIGINT,
     NUMERIC,
     VARCHAR,
     TEXT
@@ -83,6 +85,7 @@ ALTER FUNCTION public.transfer_funds(
 -- Use a fixed search path to prevent object shadowing.
 
 ALTER FUNCTION public.transfer_funds(
+    BIGINT,
     BIGINT,
     BIGINT,
     NUMERIC,
@@ -100,6 +103,7 @@ FROM securebank_transfer;
 REVOKE ALL ON FUNCTION public.transfer_funds(
     BIGINT,
     BIGINT,
+    BIGINT,
     NUMERIC,
     VARCHAR,
     TEXT
@@ -108,6 +112,7 @@ REVOKE ALL ON FUNCTION public.transfer_funds(
 -- 8. Only the application role can execute transfers.
 
 GRANT EXECUTE ON FUNCTION public.transfer_funds(
+    BIGINT,
     BIGINT,
     BIGINT,
     NUMERIC,

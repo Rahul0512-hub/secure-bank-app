@@ -11,6 +11,7 @@ BEGIN;
 -- ------------------------------------------------------------
 
 CREATE TEMP TABLE security_test_ids (
+    user_id BIGINT,
     source_account_id BIGINT,
     destination_account_id BIGINT
 );
@@ -51,7 +52,7 @@ RETURNING account_id
 \gset destination_
 
 INSERT INTO security_test_ids
-VALUES (:source_account_id, :destination_account_id);
+VALUES (:user_id, :source_account_id, :destination_account_id);
 
 GRANT SELECT ON security_test_ids TO securebank_app_login;
 
@@ -63,6 +64,7 @@ SET LOCAL ROLE securebank_app_login;
 
 DO $$
 DECLARE
+    v_user_id BIGINT;
     v_source_id BIGINT;
     v_destination_id BIGINT;
     v_balance NUMERIC(19,4);
@@ -70,8 +72,8 @@ DECLARE
     v_denied BOOLEAN;
     v_count INTEGER;
 BEGIN
-    SELECT source_account_id, destination_account_id
-    INTO v_source_id, v_destination_id
+    SELECT user_id, source_account_id, destination_account_id
+    INTO v_user_id, v_source_id, v_destination_id
     FROM security_test_ids;
 
     -- TEST 1: Application can read accounts.
@@ -168,6 +170,7 @@ BEGIN
     -- TEST 7: Application can execute the secure transfer function.
 
     v_transaction_id := public.transfer_funds(
+        v_user_id,
         v_source_id,
         v_destination_id,
         1000,

@@ -1,5 +1,6 @@
 
 CREATE OR REPLACE FUNCTION transfer_funds(
+    p_actor_user_id BIGINT,
     p_source_account_id BIGINT,
     p_destination_account_id BIGINT,
     p_amount NUMERIC(19, 4),
@@ -51,6 +52,10 @@ BEGIN
     IF NOT FOUND THEN
         RAISE EXCEPTION 'Source account % does not exist',
             p_source_account_id;
+    END IF;
+        -- Verify that the authenticated actor owns the source account.
+    IF v_source.user_id IS DISTINCT FROM p_actor_user_id THEN
+        RAISE EXCEPTION 'Source account does not belong to the authenticated user';
     END IF;
 
     -- Fetch destination account

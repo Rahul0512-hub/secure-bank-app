@@ -12,6 +12,8 @@ DECLARE
     v_source_id BIGINT;
     v_destination_id BIGINT;
     v_inactive_id BIGINT;
+    v_other_user_id BIGINT;
+    v_other_source_id BIGINT;
     v_transaction_id BIGINT;
     v_balance NUMERIC(19,4);
     v_count INTEGER;
@@ -62,6 +64,29 @@ BEGIN
     )
     RETURNING account_id INTO v_inactive_id;
 
+
+    INSERT INTO users (
+        username, password_hash, email, phone, role
+    )
+    VALUES (
+        'sql_test_other_user',
+        'test_hash',
+        'sql_test_other_user@example.com',
+        '9999999998',
+        'Customer'
+    )
+    RETURNING user_id INTO v_other_user_id;
+
+    INSERT INTO accounts (
+        user_id, account_number, account_type,
+        balance, currency, status
+    )
+    VALUES (
+        v_other_user_id, 'SQLTEST2001', 'Savings',
+        3000, 'INR', 'Active'
+    )
+    RETURNING account_id INTO v_other_source_id;
+
     RAISE NOTICE 'Test setup completed';
 
     -- --------------------------------------------------------
@@ -69,7 +94,8 @@ BEGIN
     -- --------------------------------------------------------
 
     v_transaction_id := transfer_funds(
-        v_source_id,
+            v_user_id,
+            v_source_id,
         v_destination_id,
         1000,
         'Transfer',
@@ -119,6 +145,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             v_source_id, v_destination_id,
             50000, 'Transfer', 'Insufficient balance test'
         );
@@ -139,6 +166,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             v_source_id, v_destination_id,
             0, 'Transfer', 'Zero amount test'
         );
@@ -159,6 +187,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             v_source_id, v_destination_id,
             -100, 'Transfer', 'Negative amount test'
         );
@@ -179,6 +208,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             v_source_id, v_source_id,
             100, 'Transfer', 'Same account test'
         );
@@ -199,6 +229,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             999999999, v_destination_id,
             100, 'Transfer', 'Invalid account test'
         );
@@ -219,6 +250,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             v_inactive_id, v_destination_id,
             100, 'Transfer', 'Inactive account test'
         );
@@ -239,6 +271,7 @@ BEGIN
 
     BEGIN
         PERFORM transfer_funds(
+            v_user_id,
             v_source_id, v_destination_id,
             100, '   ', 'Empty transaction type test'
         );
@@ -253,7 +286,56 @@ BEGIN
             END IF;
     END;
 
-    RAISE NOTICE 'ALL 8 FUND TRANSFER TESTS PASSED';
+
+    -- --------------------------------------------------------
+    -- TEST 9: Reject transfer from another customer's account
+    -- --------------------------------------------------------
+
+    BEGIN
+        PERFORM transfer_funds(
+            v_user_id,
+            v_other_source_id,
+            v_destination_id,
+            100,
+            'Transfer',
+            'Cross-customer ownership test'
+        );
+
+        RAISE EXCEPTION 'TEST 9 FAILED: Foreign account was accepted';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLERRM = 'Source account does not belong to the authenticated user' THEN
+                RAISE NOTICE 'TEST 9 PASSED: Foreign account rejected';
+            ELSE
+                RAISE;
+            END IF;
+    END;
+
+    -- --------------------------------------------------------
+    -- TEST 10: Reject NULL actor ID
+    -- --------------------------------------------------------
+
+    BEGIN
+        PERFORM transfer_funds(
+            NULL,
+            v_source_id,
+            v_destination_id,
+            100,
+            'Transfer',
+            'NULL actor test'
+        );
+
+        RAISE EXCEPTION 'TEST 10 FAILED: NULL actor was accepted';
+    EXCEPTION
+        WHEN OTHERS THEN
+            IF SQLERRM = 'Source account does not belong to the authenticated user' THEN
+                RAISE NOTICE 'TEST 10 PASSED: NULL actor rejected';
+            ELSE
+                RAISE;
+            END IF;
+    END;
+
+    RAISE NOTICE 'ALL 10 FUND TRANSFER TESTS PASSED';
 
 END;
 $$;
