@@ -398,7 +398,7 @@ SELECT
 
 &#x20;       current\_user,
 
-&#x20;       'public.transfer\_funds(bigint,bigint,numeric,character varying,text)',
+&#x20;       'public.transfer\_funds(bigint,bigint,bigint,numeric,character varying,text)',
 
 &#x20;       'EXECUTE'
 
@@ -478,7 +478,7 @@ docker exec -it securebank-postgres psql -U securebank -d securebank -f /tmp/tes
 
 
 
-The test script checks eight scenarios:
+The test script checks ten scenarios:
 
 
 
@@ -510,7 +510,7 @@ A successful run displays:
 
 ```text
 
-ALL 8 FUND TRANSFER TESTS PASSED
+ALL 10 FUND TRANSFER TESTS PASSED
 
 ```
 

@@ -1,4 +1,4 @@
-﻿from decimal import Decimal
+from decimal import Decimal
 
 import psycopg
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -189,9 +189,10 @@ def transfer_funds(
 
             transaction_id = connection.execute(
                 """
-                SELECT public.transfer_funds(%s, %s, %s, %s, %s)
+                SELECT public.transfer_funds(%s, %s, %s, %s, %s, %s)
                 """,
                 (
+                    user_id,
                     request.source_account_id,
                     request.destination_account_id,
                     request.amount,
