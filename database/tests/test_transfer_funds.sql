@@ -98,7 +98,19 @@ BEGIN
     IF v_count <> 1 THEN
         RAISE EXCEPTION 'TEST 1 FAILED: Transaction not recorded';
     END IF;
+    -- Verify transactional audit outbox event.
+    SELECT COUNT(*) INTO v_count
+    FROM public.transaction_audit_outbox
+    WHERE transaction_id = v_transaction_id
+      AND event_type = 'TRANSFER_COMPLETED'
+      AND payload->>'status' = 'SUCCESS'
+      AND (payload->>'amount')::NUMERIC = 1000;
 
+    IF v_count <> 1 THEN
+        RAISE EXCEPTION 'TEST 1 FAILED: Audit outbox event not recorded correctly';
+    END IF;
+
+    RAISE NOTICE 'TEST 1 PASSED: Audit outbox event recorded';
     RAISE NOTICE 'TEST 1 PASSED: Successful transfer';
 
     -- --------------------------------------------------------
