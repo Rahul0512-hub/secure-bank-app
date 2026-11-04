@@ -8,6 +8,8 @@ CREATE OR REPLACE FUNCTION transfer_funds(
 )
 RETURNS BIGINT
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = pg_catalog, public
 AS $$
 DECLARE
     v_source accounts%ROWTYPE;
@@ -109,6 +111,29 @@ BEGIN
         'Completed'
     )
     RETURNING transaction_id INTO v_transaction_id;
+
+    -- Record a completed transfer in the transactional audit outbox.
+    INSERT INTO public.transaction_audit_outbox (
+        transaction_id,
+        event_type,
+        payload
+    )
+    VALUES (
+        v_transaction_id,
+        'TRANSFER_COMPLETED',
+        jsonb_build_object(
+            'transaction_id', v_transaction_id,
+            'event_type', 'TRANSFER_COMPLETED',
+            'status', 'SUCCESS',
+            'source_account_id', p_source_account_id,
+            'destination_account_id', p_destination_account_id,
+            'amount', p_amount,
+            'currency', v_source.currency,
+            'occurred_at', CURRENT_TIMESTAMP,
+            'actor_user_id', v_source.user_id,
+            'description', p_description
+        )
+    );
 
     RETURN v_transaction_id;
 END;
