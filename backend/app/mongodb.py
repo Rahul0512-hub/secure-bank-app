@@ -16,3 +16,11 @@ def get_mongo_client() -> MongoClient:
 
 def get_audit_collection(client: MongoClient):
     return client["securebank_audit"]["transaction_audit_logs"]
+
+
+def get_fraud_alerts_collection(client: MongoClient):
+    return client["securebank_audit"]["fraud_alerts"]
+
+
+def get_login_events_collection(client: MongoClient):
+    return client["securebank_audit"]["login_events"]
