@@ -1,8 +1,9 @@
 from fastapi import FastAPI
 from backend.app.transactions import router as transactions_router
 from backend.app.accounts import router as accounts_router
-
 from backend.app.auth import router as auth_router
+from backend.app.analytics import router as analytics_router
+from backend.app.dashboard_ui import router as dashboard_ui_router
 from backend.app.mongodb import get_mongo_client
 from backend.app.postgres import get_postgres_connection
 
@@ -15,6 +16,8 @@ app = FastAPI(
 app.include_router(auth_router)
 app.include_router(accounts_router)
 app.include_router(transactions_router)
+app.include_router(analytics_router)
+app.include_router(dashboard_ui_router)
 
 @app.get("/")
 def root():
