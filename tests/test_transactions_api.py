@@ -215,6 +215,18 @@ class TestTransactionsAPI(unittest.TestCase):
         self.assertEqual(response.status_code, 503)
         self.assertNotIn("Simulated database error", response.text)
 
+    @patch("backend.app.transactions.get_postgres_connection")
+    def test_get_my_transactions_database_error_returns_503(self, mock_db):
+        import psycopg
+        mock_db.side_effect = psycopg.OperationalError("Database unreachable")
+
+        response = client.get(
+            "/transactions/me",
+            headers=self.headers(),
+        )
+
+        self.assertEqual(response.status_code, 503)
+
 
 if __name__ == "__main__":
     unittest.main()

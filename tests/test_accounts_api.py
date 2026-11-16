@@ -146,6 +146,24 @@ class TestAccountsAPI(unittest.TestCase):
         self.assertEqual(response.json()["total"], 1)
         self.assertEqual(response.json()["count"], 1)
 
+    @patch("backend.app.accounts.get_postgres_connection")
+    def test_database_error_returns_503(self, mock_db):
+        import psycopg
+        mock_db.side_effect = psycopg.OperationalError("Database down")
+
+        response = client.get(
+            "/accounts/me",
+            headers={"Authorization": f"Bearer {self.token()}"},
+        )
+        self.assertEqual(response.status_code, 503)
+
+    def test_mask_account_number_handles_edge_cases(self):
+        from backend.app.accounts import mask_account_number
+        self.assertEqual(mask_account_number(""), "")
+        self.assertEqual(mask_account_number(None), "")
+        self.assertEqual(mask_account_number("123"), "123")
+        self.assertEqual(mask_account_number("123456"), "**3456")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -10,20 +10,20 @@ from backend.app.dependencies import get_current_user, require_admin
 from backend.app.tokens import create_access_token
 
 
-test_app = FastAPI()
+auth_test_app = FastAPI()
 
 
-@test_app.get("/protected")
+@auth_test_app.get("/protected")
 def protected_route(user: dict = Depends(get_current_user)):
     return user
 
 
-@test_app.get("/admin")
+@auth_test_app.get("/admin")
 def admin_route(user: dict = Depends(require_admin)):
     return {"message": "Admin access granted", "user": user}
 
 
-client = TestClient(test_app)
+client = TestClient(auth_test_app)
 
 
 class TestAuthenticationDependencies(unittest.TestCase):

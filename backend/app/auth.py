@@ -1,4 +1,4 @@
-﻿import psycopg
+import psycopg
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel, EmailStr, Field
 
@@ -47,6 +47,11 @@ def register(request: RegisterRequest):
             status_code=status.HTTP_409_CONFLICT,
             detail="Username or email already exists",
         )
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service is temporarily unavailable. Please try again later.",
+        )
 
     if customer is None:
         raise HTTPException(
@@ -72,14 +77,20 @@ def register(request: RegisterRequest):
 @router.post("/login")
 def login(request: LoginRequest):
     # Retrieve only the matching user's authentication details.
-    with get_postgres_connection() as connection:
-        user = connection.execute(
-            """
-            SELECT user_id, username, password_hash, role
-            FROM public.get_auth_user(%s)
-            """,
-            (request.username,),
-        ).fetchone()
+    try:
+        with get_postgres_connection() as connection:
+            user = connection.execute(
+                """
+                SELECT user_id, username, password_hash, role
+                FROM public.get_auth_user(%s)
+                """,
+                (request.username,),
+            ).fetchone()
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Authentication service is temporarily unavailable. Please try again later.",
+        )
 
     # Use the same response for unknown users and incorrect passwords.
     if user is None or not verify_password(request.password, user[2]):

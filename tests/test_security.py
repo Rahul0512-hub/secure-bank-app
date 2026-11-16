@@ -24,6 +24,11 @@ class TestPasswordSecurity(unittest.TestCase):
             verify_password("WrongPassword@123", password_hash)
         )
 
+    def test_malformed_password_hash_returns_false(self):
+        self.assertFalse(
+            verify_password("SecureBankTest@123", "malformed_or_invalid_hash_string")
+        )
+
     def test_empty_password_is_rejected(self):
         password_hash = hash_password("SecureBankTest@123")
 
