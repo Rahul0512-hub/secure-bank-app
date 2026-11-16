@@ -4,7 +4,7 @@ from fastapi.responses import HTMLResponse
 router = APIRouter(tags=["Frontend Banking Portal"])
 
 # ==============================================================================
-# 1. DEDICATED LOGIN PAGE (/login)
+# 1. DEDICATED LOGIN & AUTHENTICATION PAGE (/login)
 # ==============================================================================
 LOGIN_HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -31,7 +31,7 @@ LOGIN_HTML = """<!DOCTYPE html>
   <div id="toastContainer" class="fixed top-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
   <!-- Login Card Container -->
-  <div class="glass-card w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6 relative z-10">
+  <div class="glass-card w-full max-w-md rounded-3xl p-8 shadow-2xl space-y-6 relative z-10 border border-slate-700/80">
     
     <!-- Bank Logo & Header -->
     <div class="text-center space-y-2">
@@ -41,7 +41,19 @@ LOGIN_HTML = """<!DOCTYPE html>
         </svg>
       </div>
       <h1 class="text-2xl font-bold text-white tracking-tight">Secure<span class="text-emerald-400">Bank</span></h1>
-      <p class="text-xs text-slate-400">Sign in to access your secure banking environment</p>
+      <p class="text-xs text-slate-400">Enterprise Dual-Engine Core Banking System</p>
+    </div>
+
+    <!-- Active Session Banner (if signed in) -->
+    <div id="activeSessionBanner" class="hidden p-3 rounded-2xl bg-slate-900 border border-slate-700 text-xs flex justify-between items-center">
+      <div>
+        <span class="text-slate-400">Signed in as</span>
+        <span id="activeUsername" class="font-bold text-emerald-400 ml-1"></span>
+      </div>
+      <div class="flex gap-2">
+        <a id="activePortalLink" href="/customer" class="px-2.5 py-1 rounded-lg bg-emerald-500 text-slate-950 font-bold hover:bg-emerald-400 transition text-[11px]">Continue →</a>
+        <button onclick="clearSession()" class="px-2 py-1 rounded-lg bg-slate-800 text-slate-400 hover:text-white transition text-[11px]">Switch</button>
+      </div>
     </div>
 
     <!-- Auth Tabs (Login / Register) -->
@@ -54,7 +66,7 @@ LOGIN_HTML = """<!DOCTYPE html>
     <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
       <div>
         <label class="block text-xs font-semibold text-slate-300 mb-1.5">Username</label>
-        <input id="loginUser" type="text" placeholder="Enter username" required
+        <input id="loginUser" type="text" placeholder="e.g. priya_sharma or admin" required
           class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-sm text-white placeholder-slate-500 focus:border-emerald-500 focus:outline-none transition" />
       </div>
 
@@ -96,25 +108,30 @@ LOGIN_HTML = """<!DOCTYPE html>
       </button>
     </form>
 
-    <!-- Quick Demo Fill Buttons -->
+    <!-- 1-Click Fast Login Demo Credentials -->
     <div class="pt-4 border-t border-slate-800 space-y-2.5">
-      <p class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400 text-center">Quick Demo Credentials:</p>
+      <div class="flex items-center justify-between">
+        <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400">1-Click Fast Login:</span>
+        <span class="text-[10px] text-slate-500">Click to authenticate</span>
+      </div>
       
-      <div class="grid grid-cols-2 gap-2 text-xs">
-        <button type="button" onclick="fillCreds('priya_sharma', 'CustomerPass@123')" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500 text-left transition flex items-center justify-between">
-          <div>
-            <span class="font-bold text-white block">👤 Customer</span>
-            <span class="text-[10px] text-emerald-400 font-mono">priya_sharma</span>
+      <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <button type="button" onclick="quickLogin('priya_sharma', 'CustomerPass@123')" class="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500 text-left transition flex flex-col justify-between group shadow">
+          <div class="flex items-center justify-between w-full mb-1">
+            <span class="font-bold text-white group-hover:text-emerald-400 transition">👤 Customer</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800/40">Role</span>
           </div>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300">User</span>
+          <p class="text-[10px] text-emerald-400 font-mono">priya_sharma</p>
+          <span class="text-[9px] text-slate-500 mt-1">Retail Banking Portal</span>
         </button>
 
-        <button type="button" onclick="fillCreds('bank_admin', 'AdminPass@123')" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-purple-500 text-left transition flex items-center justify-between">
-          <div>
-            <span class="font-bold text-white block">🏦 Bank Admin</span>
-            <span class="text-[10px] text-purple-300 font-mono">bank_admin</span>
+        <button type="button" onclick="quickLogin('admin', 'AdminPassword@123')" class="p-3 rounded-2xl bg-slate-900/90 hover:bg-slate-800 border border-slate-800 hover:border-purple-500 text-left transition flex flex-col justify-between group shadow">
+          <div class="flex items-center justify-between w-full mb-1">
+            <span class="font-bold text-white group-hover:text-purple-400 transition">🏦 Bank Admin</span>
+            <span class="text-[10px] font-bold px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 border border-purple-800/40">Staff</span>
           </div>
-          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-900 text-purple-200">Admin</span>
+          <p class="text-[10px] text-purple-300 font-mono">admin</p>
+          <span class="text-[9px] text-slate-500 mt-1">Risk Desk & AML Center</span>
         </button>
       </div>
 
@@ -129,11 +146,19 @@ LOGIN_HTML = """<!DOCTYPE html>
       const colors = {
         success: 'bg-emerald-950 border-emerald-700 text-emerald-200',
         error: 'bg-rose-950 border-rose-700 text-rose-200',
+        warning: 'bg-amber-950 border-amber-700 text-amber-200',
       };
       toast.className = `p-3.5 rounded-xl border ${colors[type] || colors.error} shadow-xl backdrop-blur-md text-xs pointer-events-auto`;
       toast.innerHTML = `<p class="font-bold">${title}</p><p class="mt-0.5 text-slate-300">${msg}</p>`;
       container.appendChild(toast);
       setTimeout(() => toast.remove(), 4000);
+    }
+
+    function clearSession() {
+      localStorage.removeItem('sb_token');
+      localStorage.removeItem('sb_user');
+      document.getElementById('activeSessionBanner').classList.add('hidden');
+      showToast('Session Cleared', 'You can sign in with any account below.', 'success');
     }
 
     function switchAuthMode(mode) {
@@ -150,17 +175,22 @@ LOGIN_HTML = """<!DOCTYPE html>
       }
     }
 
-    function fillCreds(u, p) {
-      switchAuthMode('login');
+    async function quickLogin(u, p) {
       document.getElementById('loginUser').value = u;
       document.getElementById('loginPass').value = p;
+      await authenticateUser(u, p);
     }
 
     async function handleLogin(e) {
       e.preventDefault();
       const u = document.getElementById('loginUser').value.trim();
       const p = document.getElementById('loginPass').value;
+      await authenticateUser(u, p);
+    }
+
+    async function authenticateUser(u, p) {
       const btn = document.getElementById('submitBtn');
+      const originalText = btn.innerText;
       btn.innerText = 'Authenticating...';
       btn.disabled = true;
 
@@ -176,14 +206,18 @@ LOGIN_HTML = """<!DOCTYPE html>
         localStorage.setItem('sb_token', data.access_token);
         localStorage.setItem('sb_user', JSON.stringify(data.user));
 
-        if (data.user.role === 'Admin') {
-          window.location.href = '/admin';
-        } else {
-          window.location.href = '/customer';
-        }
+        showToast('Authenticated', `Welcome back, ${data.user.username}!`, 'success');
+
+        setTimeout(() => {
+          if (data.user.role === 'Admin') {
+            window.location.href = '/admin';
+          } else {
+            window.location.href = '/customer';
+          }
+        }, 300);
       } catch (err) {
         showToast('Authentication Failed', err.message, 'error');
-        btn.innerText = 'Authorize & Sign In';
+        btn.innerText = originalText;
         btn.disabled = false;
       }
     }
@@ -207,7 +241,8 @@ LOGIN_HTML = """<!DOCTYPE html>
         if (!res.ok) throw new Error(data.detail || 'Registration failed');
 
         showToast('Registration Success', 'Account created! Signing you in...', 'success');
-        // Auto login
+
+        // Automatically log in newly registered user
         const loginRes = await fetch('/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -216,24 +251,51 @@ LOGIN_HTML = """<!DOCTYPE html>
         const loginData = await loginRes.json();
         localStorage.setItem('sb_token', loginData.access_token);
         localStorage.setItem('sb_user', JSON.stringify(loginData.user));
+
+        // Open default savings account
+        try {
+          await fetch('/accounts/open', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${loginData.access_token}` },
+            body: JSON.stringify({ account_type: 'Savings', initial_deposit: 5000.0 })
+          });
+        } catch (accErr) {}
+
         window.location.href = '/customer';
       } catch (err) {
         showToast('Registration Error', err.message, 'error');
       }
     }
 
-    // Auto redirect if already signed in
-    window.addEventListener('DOMContentLoaded', () => {
+    // Check query params and session state
+    window.addEventListener('DOMContentLoaded', async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('msg') === 'session_expired') {
+        showToast('Session Expired', 'Your authentication session expired. Please sign in again.', 'warning');
+      } else if (params.get('msg') === 'signed_out') {
+        showToast('Signed Out', 'You have been signed out safely.', 'success');
+      }
+
+      // Check if existing token is valid
       const token = localStorage.getItem('sb_token');
       const userStr = localStorage.getItem('sb_user');
       if (token && userStr) {
         try {
           const user = JSON.parse(userStr);
-          if (user.role === 'Admin') window.location.href = '/admin';
-          else window.location.href = '/customer';
+          const banner = document.getElementById('activeSessionBanner');
+          const usernameEl = document.getElementById('activeUsername');
+          const portalLink = document.getElementById('activePortalLink');
+          if (banner && usernameEl && portalLink) {
+            usernameEl.innerText = `${user.username} (${user.role})`;
+            portalLink.href = user.role === 'Admin' ? '/admin' : '/customer';
+            banner.classList.remove('hidden');
+          }
         } catch (e) {}
       }
-      fillCreds('priya_sharma', 'CustomerPass@123');
+
+      // Fill default customer credentials in form for easy testing
+      document.getElementById('loginUser').value = 'priya_sharma';
+      document.getElementById('loginPass').value = 'CustomerPass@123';
     });
   </script>
 </body>
@@ -241,7 +303,7 @@ LOGIN_HTML = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# 2. DEDICATED CUSTOMER BANKING PAGE (/customer)
+# 2. DEDICATED CUSTOMER BANKING PORTAL (/customer)
 # ==============================================================================
 CUSTOMER_HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -286,9 +348,9 @@ CUSTOMER_HTML = """<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Top Navbar - Full Width Screen -->
-  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-10 py-3.5">
-    <div class="w-full flex items-center justify-between gap-4">
+  <!-- Top Sticky Navbar -->
+  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3.5">
+    <div class="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
       
       <!-- Brand -->
       <div class="flex items-center gap-3">
@@ -303,14 +365,17 @@ CUSTOMER_HTML = """<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- User Greeting & Logout -->
+      <!-- User Greeting & Controls -->
       <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
           <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
           <span id="navUsername" class="font-bold text-slate-200">Customer</span>
           <span class="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300">Customer</span>
         </div>
-        <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+        <a href="/login" class="hidden sm:inline-block px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+          Switch Account
+        </a>
+        <button onclick="logout()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-rose-300 border border-rose-900/50 hover:border-rose-700 transition">
           Sign Out
         </button>
       </div>
@@ -321,220 +386,243 @@ CUSTOMER_HTML = """<!DOCTYPE html>
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-  <!-- Main Content - Fits Whole Laptop Screen -->
-  <main class="flex-1 w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 space-y-8">
+  <!-- Main Content - Balanced Proportional Grid -->
+  <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
     
     <!-- Hero Summary Bar -->
-    <div class="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 p-6 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div class="rounded-3xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800/90 p-6 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-white">Welcome, <span id="heroName" class="text-emerald-400">Customer</span></h1>
-        <p class="text-xs text-slate-400 mt-1">Primary Retail Banking • Protected by PostgreSQL Least-Privilege Isolation</p>
-      </div>
-      <div class="flex items-center gap-6 bg-slate-950/80 border border-slate-800 rounded-2xl p-4">
-        <div>
-          <span class="text-[11px] font-semibold uppercase text-slate-400 block">Total Net Balance</span>
-          <span id="heroTotalBalance" class="text-2xl font-black text-white font-mono">₹0.00</span>
-        </div>
-        <button onclick="openNewAccountModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition">
-          + Open Account
-        </button>
-      </div>
-    </div>
-
-    <!-- 1. Account Cards -->
-    <div>
-      <h2 class="text-base font-bold text-white mb-3 flex items-center gap-2">
-        <span>My Accounts</span>
-        <span class="text-xs font-normal text-slate-400">(Encrypted in PostgreSQL accounts table)</span>
-      </h2>
-      <div id="accountsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Populated via JS -->
-      </div>
-    </div>
-
-    <!-- 2. Transfer Studio -->
-    <div class="glass-panel rounded-2xl p-7 shadow-xl space-y-6">
-      <div class="border-b border-slate-800 pb-4 flex flex-wrap justify-between items-center gap-3">
-        <div>
-          <h2 class="text-lg font-bold text-white flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
-            Instant Fund Transfer
-          </h2>
-          <p class="text-xs text-slate-400">Atomic execution via PostgreSQL stored procedure <code class="text-emerald-300">transfer_funds</code></p>
-        </div>
-        <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-semibold">
-          ACID Engine • Instant Settlement
-        </span>
-      </div>
-
-      <form onsubmit="handleTransfer(event)" class="space-y-5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Debit From Account</label>
-            <select id="transferSource" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Send To Beneficiary</label>
-            <select id="transferDest" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
-          </div>
-        </div>
-
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Transfer Amount (INR ₹)</label>
-          <div class="relative">
-            <span class="absolute left-4 top-3 text-slate-400 font-mono text-base font-semibold">₹</span>
-            <input id="transferAmount" type="number" step="0.01" min="1" max="500000" placeholder="0.00" required
-              oninput="checkAmountWarning(this.value)"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-3 text-slate-100 font-mono font-semibold text-base focus:border-emerald-500 focus:outline-none" />
-          </div>
-          <!-- Quick Chips -->
-          <div class="flex flex-wrap gap-2 mt-2.5">
-            <button type="button" onclick="setAmount(1000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹1,000</button>
-            <button type="button" onclick="setAmount(5000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹5,000</button>
-            <button type="button" onclick="setAmount(15000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹15,000</button>
-            <button type="button" onclick="setAmount(50000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-amber-900/50 text-amber-300 font-mono transition">₹50,000 (Alert Trigger)</button>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
-            <select id="transferCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none">
-              <option value="Transfer">Inter-Account Transfer</option>
-              <option value="Food & Dining">Food & Dining</option>
-              <option value="Bills & Utilities">Bills & Utilities</option>
-              <option value="Travel">Travel & Lodging</option>
-              <option value="Investments">Investments</option>
-              <option value="International Wire">International Wire (High Risk)</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Description / Memo</label>
-            <input id="transferDesc" type="text" placeholder="e.g. Monthly rent, groceries"
-              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none" />
-          </div>
-        </div>
-
-        <!-- Dynamic Warning -->
-        <div id="riskWarning" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-          ⚠️ <strong>Risk Alert:</strong> Transfers ≥ ₹50,000 trigger velocity anomaly scoring and are replicated to MongoDB Fraud Center.
-        </div>
-
-        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20">
-          Confirm & Send Transfer
-        </button>
-      </form>
-    </div>
-
-    <!-- 3. Transaction History Table -->
-    <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
-      <div class="flex flex-wrap justify-between items-center border-b border-slate-800 pb-3 gap-3">
-        <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-            Transaction Statement
-          </h2>
-          <p class="text-xs text-slate-400">PostgreSQL ACID Transaction Ledger • Audited Dual-Engine Outbox</p>
-        </div>
         <div class="flex items-center gap-2">
-          <button id="pdfDownloadBtn" onclick="generateTransactionPDF()" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Generate Statement PDF
-          </button>
-          <button onclick="printOnlyStatement()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-1.5">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-            Print Statement
+          <h1 class="text-2xl font-bold text-white tracking-tight">Welcome back, <span id="heroName" class="text-emerald-400">Customer</span></h1>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/50 font-semibold">Active Session</span>
+        </div>
+        <p class="text-xs text-slate-400 mt-1">Dual-Engine Core Banking • PostgreSQL ACID Protection • Real-Time Fraud Quarantine</p>
+      </div>
+
+      <!-- Total Balance & Quick Action -->
+      <div class="flex items-center gap-4 bg-slate-950/80 border border-slate-800 rounded-2xl p-3 sm:px-5 sm:py-3.5">
+        <div>
+          <span class="text-[10px] font-semibold uppercase text-slate-400 block font-mono">Consolidated Net Balance</span>
+          <span id="heroTotalBalance" class="text-2xl font-black text-white font-mono tracking-tight">₹0.00</span>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="openNewAccountModal()" class="px-3 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase transition shadow-lg shadow-emerald-500/20">
+            + Open Account
           </button>
         </div>
       </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead class="bg-slate-950 text-slate-400 uppercase font-mono border-b border-slate-800">
-            <tr>
-              <th class="py-2.5 px-3">TX ID</th>
-              <th class="py-2.5 px-3">Date</th>
-              <th class="py-2.5 px-3">Direction</th>
-              <th class="py-2.5 px-3">Description</th>
-              <th class="py-2.5 px-3 text-right">Amount</th>
-              <th class="py-2.5 px-3 text-center">Status</th>
-            </tr>
-          </thead>
-          <tbody id="txListBody" class="divide-y divide-slate-800 font-mono"></tbody>
-        </table>
-      </div>
     </div>
 
-    <!-- 4. Loans & Interactive EMI Simulator -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Balanced 2-Column Dashboard Grid (7 cols / 5 cols) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       
-      <!-- EMI Calculator (7 cols) -->
-      <div class="lg:col-span-7 glass-panel rounded-2xl p-6 shadow-xl space-y-5">
-        <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
-          <div>
-            <h2 class="text-base font-bold text-white">Loan & EMI Calculator</h2>
-            <p class="text-xs text-slate-400">Simulate monthly amortization</p>
-          </div>
-          <button onclick="openApplyLoanModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition">
-            + Apply for Loan
-          </button>
-        </div>
-
-        <div class="space-y-3 text-xs">
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-slate-400">Principal</span>
-              <span id="pVal" class="text-white font-bold font-mono">₹5,00,000</span>
-            </div>
-            <input type="range" id="pSlider" min="50000" max="5000000" step="25000" value="500000" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
+      <!-- LEFT COLUMN (7 COLS): Accounts & Transaction History -->
+      <div class="lg:col-span-7 space-y-6">
+        
+        <!-- 1. My Accounts Cards -->
+        <div>
+          <div class="flex justify-between items-center mb-3">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+              My Bank Accounts
+            </h2>
+            <span class="text-xs text-slate-400 font-mono">PostgreSQL `accounts` table</span>
           </div>
 
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-slate-400">Interest Rate</span>
-              <span id="rVal" class="text-white font-bold font-mono">8.50%</span>
-            </div>
-            <input type="range" id="rSlider" min="5.0" max="18.0" step="0.25" value="8.50" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
-          </div>
-
-          <div>
-            <div class="flex justify-between mb-1">
-              <span class="text-slate-400">Tenure</span>
-              <span id="tVal" class="text-white font-bold font-mono">36 Months</span>
-            </div>
-            <input type="range" id="tSlider" min="6" max="120" step="6" value="36" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
+          <div id="accountsList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Dynamically populated -->
           </div>
         </div>
 
-        <!-- Calculated Summary -->
-        <div class="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-center">
-          <div>
-            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Monthly EMI</span>
-            <span id="resEMI" class="text-sm font-bold text-amber-400 font-mono">₹15,780</span>
+        <!-- 2. Transaction Statement & PDF Export -->
+        <div class="glass-panel rounded-3xl p-6 shadow-xl space-y-4">
+          <div class="flex flex-wrap justify-between items-center border-b border-slate-800 pb-3 gap-3">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                Transaction Statement
+              </h2>
+              <p class="text-xs text-slate-400">PostgreSQL ACID Transaction Ledger • Audited Dual-Engine Outbox</p>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <button id="pdfDownloadBtn" onclick="generateTransactionPDF()" class="px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                Generate Statement PDF
+              </button>
+              <button onclick="printOnlyStatement()" class="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-semibold text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                Print
+              </button>
+            </div>
           </div>
-          <div>
-            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Total Interest</span>
-            <span id="resInterest" class="text-sm font-bold text-slate-300 font-mono">₹68,080</span>
-          </div>
-          <div>
-            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Total Payable</span>
-            <span id="resTotal" class="text-sm font-bold text-white font-mono">₹5,68,080</span>
+
+          <!-- Transaction Ledger Table -->
+          <div class="overflow-x-auto max-h-[420px] overflow-y-auto">
+            <table class="w-full text-left text-xs">
+              <thead class="sticky top-0 bg-slate-950 text-slate-400 uppercase font-mono border-b border-slate-800 z-10">
+                <tr>
+                  <th class="py-2.5 px-3">TX ID</th>
+                  <th class="py-2.5 px-3">Date</th>
+                  <th class="py-2.5 px-3">Direction</th>
+                  <th class="py-2.5 px-3">Description</th>
+                  <th class="py-2.5 px-3 text-right">Amount</th>
+                  <th class="py-2.5 px-3 text-center">Status</th>
+                </tr>
+              </thead>
+              <tbody id="txListBody" class="divide-y divide-slate-800/80 font-mono">
+                <tr><td colspan="6" class="text-center py-6 text-slate-500">Loading transaction history...</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
+
       </div>
 
-      <!-- Active Loans (5 cols) -->
-      <div class="lg:col-span-5 glass-panel rounded-2xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
-        <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
-          <h2 class="text-base font-bold text-white">Active Facility Portfolio</h2>
-          <span class="text-[10px] font-mono text-slate-400">Approved via Admin Desk</span>
+      <!-- RIGHT COLUMN (5 COLS): Transfer Studio & Loan Calculator -->
+      <div class="lg:col-span-5 space-y-6">
+        
+        <!-- 3. Instant Fund Transfer Studio (Compact, Sleek Card) -->
+        <div class="glass-panel rounded-3xl p-6 shadow-xl space-y-4 border border-slate-700/80">
+          <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+            <div>
+              <h2 class="text-base font-bold text-white flex items-center gap-2">
+                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
+                Instant Fund Transfer
+              </h2>
+              <p class="text-[11px] text-slate-400">Atomic execution via <code class="text-emerald-300">transfer_funds</code> procedure</p>
+            </div>
+            <span class="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800 font-semibold">
+              ACID Settled
+            </span>
+          </div>
+
+          <form onsubmit="handleTransfer(event)" class="space-y-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Debit From Account</label>
+              <select id="transferSource" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Send To Beneficiary</label>
+              <select id="transferDest" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 mb-1">Transfer Amount (INR ₹)</label>
+              <div class="relative">
+                <span class="absolute left-3.5 top-2.5 text-slate-400 font-mono text-sm font-semibold">₹</span>
+                <input id="transferAmount" type="number" step="0.01" min="1" max="500000" placeholder="0.00" required
+                  oninput="checkAmountWarning(this.value)"
+                  class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 text-slate-100 font-mono font-semibold text-sm focus:border-emerald-500 focus:outline-none" />
+              </div>
+              <!-- Quick Chips -->
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                <button type="button" onclick="setAmount(1000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹1k</button>
+                <button type="button" onclick="setAmount(5000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹5k</button>
+                <button type="button" onclick="setAmount(15000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹15k</button>
+                <button type="button" onclick="setAmount(50000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-amber-900/50 text-amber-300 font-mono transition">₹50k (Alert)</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Category</label>
+                <select id="transferCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-2.5 py-2 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none">
+                  <option value="Transfer">Inter-Account</option>
+                  <option value="Food & Dining">Food & Dining</option>
+                  <option value="Bills & Utilities">Bills & Utilities</option>
+                  <option value="Travel">Travel & Lodging</option>
+                  <option value="Investments">Investments</option>
+                  <option value="International Wire">International Wire</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Description / Memo</label>
+                <input id="transferDesc" type="text" placeholder="e.g. Rent, groceries"
+                  class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none" />
+              </div>
+            </div>
+
+            <!-- Dynamic Risk Alert Warning -->
+            <div id="riskWarning" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+              ⚠️ <strong>Risk Notice:</strong> Transfers ≥ ₹50,000 trigger AML scoring and are replicated to MongoDB Fraud Center.
+            </div>
+
+            <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20">
+              Confirm & Send Transfer
+            </button>
+          </form>
         </div>
-        <div id="customerLoansList" class="space-y-2.5 overflow-y-auto max-h-64"></div>
+
+        <!-- 4. Loan & Interactive EMI Calculator -->
+        <div class="glass-panel rounded-3xl p-6 shadow-xl space-y-4">
+          <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+            <div>
+              <h2 class="text-base font-bold text-white">Loan & EMI Calculator</h2>
+              <p class="text-xs text-slate-400">Simulate monthly amortization</p>
+            </div>
+            <button onclick="openApplyLoanModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-bold transition">
+              + Apply Loan
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <div class="flex justify-between mb-1">
+                <span class="text-slate-400">Principal</span>
+                <span id="pVal" class="text-white font-bold font-mono">₹5,00,000</span>
+              </div>
+              <input type="range" id="pSlider" min="50000" max="5000000" step="25000" value="500000" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Rate</span>
+                  <span id="rVal" class="text-white font-bold font-mono">8.50%</span>
+                </div>
+                <input type="range" id="rSlider" min="5.0" max="18.0" step="0.25" value="8.50" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
+              </div>
+
+              <div>
+                <div class="flex justify-between mb-1">
+                  <span class="text-slate-400">Tenure</span>
+                  <span id="tVal" class="text-white font-bold font-mono">36m</span>
+                </div>
+                <input type="range" id="tSlider" min="6" max="120" step="6" value="36" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Calculated Summary Box -->
+          <div class="grid grid-cols-3 gap-2 p-3 rounded-xl bg-slate-950 border border-slate-800 text-center">
+            <div>
+              <span class="text-[9px] text-slate-400 uppercase block font-semibold">Monthly EMI</span>
+              <span id="resEMI" class="text-xs font-bold text-amber-400 font-mono">₹15,780</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 uppercase block font-semibold">Total Interest</span>
+              <span id="resInterest" class="text-xs font-bold text-slate-300 font-mono">₹68,080</span>
+            </div>
+            <div>
+              <span class="text-[9px] text-slate-400 uppercase block font-semibold">Total Payable</span>
+              <span id="resTotal" class="text-xs font-bold text-white font-mono">₹5,68,080</span>
+            </div>
+          </div>
+
+          <!-- Active Facilities List -->
+          <div class="pt-2 border-t border-slate-800">
+            <h3 class="text-xs font-bold text-white mb-2">My Active Credit Facilities</h3>
+            <div id="customerLoansList" class="space-y-2 overflow-y-auto max-h-40"></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
 
-    <!-- Official Transaction Statement Container (Rendered to PDF & Pure Print) -->
+    <!-- Official Transaction Statement Container (Rendered to PDF & Print) -->
     <div id="printableStatementArea" class="hidden">
       <div id="statementSheet" style="background:#ffffff; color:#0f172a; padding:36px; font-family:'Plus Jakarta Sans', Arial, sans-serif; max-width:850px; margin:0 auto; box-sizing:border-box; border-radius:12px; box-shadow:0 10px 25px rgba(0,0,0,0.05);">
         
@@ -618,7 +706,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
 
   <!-- Modals -->
   <div id="newAccountModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
-    <div class="glass-panel w-full max-w-sm rounded-2xl p-6 shadow-2xl space-y-4 border border-slate-700">
+    <div class="glass-panel w-full max-w-sm rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-700">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Open Bank Account</h3>
         <button onclick="closeNewAccountModal()" class="text-slate-400 hover:text-white">✕</button>
@@ -636,13 +724,13 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           <label class="block text-slate-400 mb-1">Initial Deposit (₹)</label>
           <input id="newAccountDeposit" type="number" step="0.01" min="0" value="5000" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
         </div>
-        <button type="submit" class="w-full py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase">Open Account</button>
+        <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase">Open Account</button>
       </form>
     </div>
   </div>
 
   <div id="applyLoanModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden p-4">
-    <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl space-y-4 border border-slate-700">
+    <div class="glass-panel w-full max-w-md rounded-3xl p-6 shadow-2xl space-y-4 border border-slate-700">
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Loan Application Form</h3>
         <button onclick="closeApplyLoanModal()" class="text-slate-400 hover:text-white">✕</button>
@@ -672,7 +760,6 @@ CUSTOMER_HTML = """<!DOCTYPE html>
   </div>
 
   <script>
-    let authToken = localStorage.getItem('sb_token') || null;
     let currentUser = null;
     let myAccounts = [];
     let currentTransactionsList = [];
@@ -694,7 +781,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     function logout() {
       localStorage.removeItem('sb_token');
       localStorage.removeItem('sb_user');
-      window.location.href = '/login';
+      window.location.href = '/login?msg=signed_out';
     }
 
     function openNewAccountModal() { document.getElementById('newAccountModal').classList.remove('hidden'); }
@@ -721,7 +808,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
 
       document.getElementById('pVal').innerText = '₹' + p.toLocaleString();
       document.getElementById('rVal').innerText = r.toFixed(2) + '%';
-      document.getElementById('tVal').innerText = n + ' Months';
+      document.getElementById('tVal').innerText = n + 'm';
 
       const mr = (r / 100) / 12;
       const factor = Math.pow(1 + mr, n);
@@ -742,10 +829,34 @@ CUSTOMER_HTML = """<!DOCTYPE html>
         return;
       }
 
-      currentUser = JSON.parse(userStr);
+      try {
+        currentUser = JSON.parse(userStr);
+      } catch (e) {
+        logout();
+        return;
+      }
+
+      // Role check: Admins belong on /admin
       if (currentUser.role === 'Admin') {
         window.location.href = '/admin';
         return;
+      }
+
+      // Verify token with backend
+      try {
+        const verifyRes = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (verifyRes.status === 401 || verifyRes.status === 403) {
+          localStorage.removeItem('sb_token');
+          localStorage.removeItem('sb_user');
+          window.location.href = '/login?msg=session_expired';
+          return;
+        }
+        if (verifyRes.ok) {
+          const profile = await verifyRes.json();
+          currentUser.email = profile.email;
+        }
+      } catch (e) {
+        // Network warning only
       }
 
       document.getElementById('navUsername').innerText = currentUser.username;
@@ -754,6 +865,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       try {
         // Accounts
         const accRes = await fetch('/accounts/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (accRes.status === 401) { logout(); return; }
         if (accRes.ok) {
           const accData = await accRes.json();
           myAccounts = accData.accounts || [];
@@ -786,24 +898,34 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       accs.forEach(a => total += parseFloat(a.balance));
       document.getElementById('heroTotalBalance').innerText = '₹' + total.toLocaleString('en-IN', { minimumFractionDigits: 2 });
 
+      if (!accs.length) {
+        container.innerHTML = `
+          <div class="col-span-2 glass-card rounded-2xl p-6 text-center text-slate-400 space-y-2">
+            <p class="font-semibold text-white">No active bank accounts found.</p>
+            <p class="text-xs">Click "+ Open Account" above to create your first savings or checking account.</p>
+          </div>
+        `;
+        return;
+      }
+
       container.innerHTML = accs.map(a => `
-        <div class="glass-card rounded-2xl p-5 shadow-lg flex flex-col justify-between">
-          <div class="flex justify-between items-start mb-3">
+        <div class="glass-card rounded-2xl p-4 shadow-lg flex flex-col justify-between hover:border-emerald-500/50 transition">
+          <div class="flex justify-between items-start mb-2">
             <div>
-              <span class="text-xs uppercase text-slate-400 font-mono">${a.account_type}</span>
+              <span class="text-[10px] uppercase text-slate-400 font-mono font-bold">${a.account_type}</span>
               <p class="text-xs font-mono text-emerald-400 mt-0.5">${a.account_number}</p>
             </div>
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${a.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'}">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${a.status === 'Active' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'}">
               ${a.status}
             </span>
           </div>
-          <div>
-            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Balance</span>
-            <span class="text-2xl font-black text-white font-mono">₹${parseFloat(a.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
+          <div class="my-1">
+            <span class="text-[9px] text-slate-400 uppercase block font-semibold">Available Balance</span>
+            <span class="text-xl font-black text-white font-mono">₹${parseFloat(a.balance).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</span>
           </div>
-          <div class="mt-4 pt-3 border-t border-slate-800 text-xs flex justify-between">
-            <span class="text-slate-500 font-mono">Currency: ${a.currency}</span>
-            <button onclick="document.getElementById('transferSource').value = ${a.account_id}" class="text-emerald-400 hover:text-emerald-300 font-semibold">Select Source</button>
+          <div class="mt-2 pt-2 border-t border-slate-800 text-[11px] flex justify-between items-center">
+            <span class="text-slate-500 font-mono">${a.currency}</span>
+            <button onclick="document.getElementById('transferSource').value = ${a.account_id}" class="text-emerald-400 hover:text-emerald-300 font-bold transition">Use for Transfer →</button>
           </div>
         </div>
       `).join('');
@@ -830,7 +952,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       currentTransactionsList = txs || [];
       const tbody = document.getElementById('txListBody');
       if (!txs.length) {
-        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-4 text-slate-500">No transactions recorded.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No transactions recorded yet.</td></tr>`;
         return;
       }
       tbody.innerHTML = txs.map(t => {
@@ -840,11 +962,11 @@ CUSTOMER_HTML = """<!DOCTYPE html>
             <td class="py-2.5 px-3 font-bold text-slate-300">#${t.transaction_id}</td>
             <td class="py-2.5 px-3 text-slate-400">${new Date(t.created_at).toLocaleDateString()}</td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isDebit ? 'bg-rose-950 text-rose-300' : 'bg-emerald-950 text-emerald-300'}">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isDebit ? 'bg-rose-950 text-rose-300 border border-rose-800/40' : 'bg-emerald-950 text-emerald-300 border border-emerald-800/40'}">
                 ${isDebit ? 'DEBIT ➔ ' + t.destination_account_id : 'CREDIT ⬅ ' + t.source_account_id}
               </span>
             </td>
-            <td class="py-2.5 px-3 text-slate-200">${t.description || 'Transfer'}</td>
+            <td class="py-2.5 px-3 text-slate-200 font-sans">${t.description || 'Transfer'}</td>
             <td class="py-2.5 px-3 text-right font-bold ${isDebit ? 'text-rose-400' : 'text-emerald-400'}">
               ${isDebit ? '- ₹' : '+ ₹'}${parseFloat(t.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
             </td>
@@ -920,7 +1042,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     async function generateTransactionPDF() {
       const btn = document.getElementById('pdfDownloadBtn');
       const originalHtml = btn.innerHTML;
-      btn.innerHTML = `<svg class="w-4 h-4 animate-spin inline-block mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Fetching All Transactions & Generating PDF...`;
+      btn.innerHTML = `<svg class="w-4 h-4 animate-spin inline-block mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Generating PDF...`;
       btn.disabled = true;
 
       try {
@@ -988,19 +1110,19 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     function renderLoans(loans) {
       const c = document.getElementById('customerLoansList');
       if (!loans.length) {
-        c.innerHTML = `<p class="text-xs text-slate-500 py-3 text-center">No active loans.</p>`;
+        c.innerHTML = `<p class="text-[11px] text-slate-500 py-2 text-center">No active credit facilities.</p>`;
         return;
       }
       c.innerHTML = loans.map(l => `
-        <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center text-xs">
+        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-center text-xs">
           <div>
-            <span class="font-bold text-white">Loan #${l.loan_id}</span>
-            <span class="text-[10px] ml-2 px-2 py-0.5 rounded font-bold ${l.status === 'Active' ? 'bg-emerald-950 text-emerald-300' : 'bg-amber-950 text-amber-300'}">${l.status}</span>
-            <p class="text-[10px] text-slate-400 mt-0.5 font-mono">Rate: ${l.interest_rate} • ${l.tenure_months}m</p>
+            <span class="font-bold text-white">Facility #${l.loan_id}</span>
+            <span class="text-[9px] ml-1.5 px-1.5 py-0.2 rounded font-bold ${l.status === 'Active' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/40' : 'bg-amber-950 text-amber-300 border border-amber-800/40'}">${l.status}</span>
+            <p class="text-[10px] text-slate-400 mt-0.5 font-mono">${l.interest_rate}% • ${l.tenure_months}m</p>
           </div>
           <div class="text-right font-mono">
             <span class="text-amber-400 font-bold block">₹${parseFloat(l.loan_amount).toLocaleString()}</span>
-            <span class="text-[10px] text-slate-400">EMI: ₹${parseFloat(l.monthly_emi).toLocaleString()}/mo</span>
+            <span class="text-[10px] text-slate-400">EMI: ₹${parseFloat(l.monthly_emi).toLocaleString()}/m</span>
           </div>
         </div>
       `).join('');
@@ -1133,9 +1255,9 @@ ADMIN_HTML = """<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Top Navbar - Full Width Screen -->
-  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-10 py-3.5">
-    <div class="w-full flex items-center justify-between gap-4">
+  <!-- Top Sticky Navbar -->
+  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3.5">
+    <div class="max-w-[1440px] mx-auto flex items-center justify-between gap-4">
       
       <!-- Brand -->
       <div class="flex items-center gap-3">
@@ -1152,9 +1274,9 @@ ADMIN_HTML = """<!DOCTYPE html>
 
       <!-- Controls & Logout -->
       <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
           <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
-          <span class="font-bold text-slate-200">Bank Risk Office</span>
+          <span id="adminUsernameBadge" class="font-bold text-slate-200">Bank Risk Office</span>
           <span class="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-purple-950 text-purple-300">Staff</span>
         </div>
 
@@ -1163,7 +1285,11 @@ ADMIN_HTML = """<!DOCTYPE html>
           Sync Outbox
         </button>
 
-        <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+        <a href="/login" class="hidden sm:inline-block px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+          Switch Account
+        </a>
+
+        <button onclick="logout()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-rose-300 border border-rose-900/50 hover:border-rose-700 transition">
           Sign Out
         </button>
       </div>
@@ -1174,18 +1300,18 @@ ADMIN_HTML = """<!DOCTYPE html>
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-  <!-- Main Content - Fits Whole Laptop Screen -->
-  <main class="flex-1 w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 space-y-8">
+  <!-- Main Content - Balanced Proportional Container -->
+  <main class="flex-1 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
     
     <!-- Top Bar -->
     <div class="flex flex-wrap justify-between items-center gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-white">Bank Administration & Risk Supervision</h1>
-        <p class="text-xs text-slate-400 mt-1">Dual-Engine Supervision • PostgreSQL ACID Banking Core • MongoDB Risk Quarantine</p>
+        <h1 class="text-2xl font-bold text-white tracking-tight">Bank Administration & Risk Supervision</h1>
+        <p class="text-xs text-slate-400 mt-1">Dual-Engine Supervision • PostgreSQL ACID Core • MongoDB Risk Quarantine</p>
       </div>
       <div class="flex items-center gap-2">
-        <button onclick="simulateFraud()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 transition">
-          + Simulate Fraud Transfer
+        <button onclick="simulateFraud()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 transition shadow">
+          + Simulate Fraud Alert
         </button>
         <button onclick="triggerSync()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 transition">
           Sync Outbox Events
@@ -1195,116 +1321,120 @@ ADMIN_HTML = """<!DOCTYPE html>
 
     <!-- Executive KPI Ribbon (5 Metrics) -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
-      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+      <div class="glass-panel rounded-2xl p-4 shadow-lg border border-slate-800/80">
         <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Total Deposits (AUM)</span>
         <span id="kpiAUM" class="text-xl font-black text-emerald-400 font-mono mt-1 block">₹0.00</span>
       </div>
-      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+      <div class="glass-panel rounded-2xl p-4 shadow-lg border border-slate-800/80">
         <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Active Accounts</span>
         <span id="kpiAccounts" class="text-xl font-black text-white font-mono mt-1 block">0</span>
       </div>
-      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+      <div class="glass-panel rounded-2xl p-4 shadow-lg border border-slate-800/80">
         <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Total Transfers</span>
         <span id="kpiTransfers" class="text-xl font-black text-cyan-400 font-mono mt-1 block">0</span>
       </div>
-      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+      <div class="glass-panel rounded-2xl p-4 shadow-lg border border-slate-800/80">
         <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Open Fraud Alerts</span>
         <span id="kpiAlerts" class="text-xl font-black text-rose-400 font-mono mt-1 block">0</span>
       </div>
-      <div class="glass-panel rounded-2xl p-4 shadow-lg col-span-2 md:col-span-1">
+      <div class="glass-panel rounded-2xl p-4 shadow-lg border border-slate-800/80 col-span-2 md:col-span-1">
         <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Pending Outbox</span>
         <span id="kpiOutbox" class="text-xl font-black text-purple-400 font-mono mt-1 block">0</span>
       </div>
     </div>
 
-    <!-- Loan Underwriting & Approval Center -->
-    <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
-      <div class="flex justify-between items-center border-b border-slate-800 pb-3">
-        <div>
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Loan Underwriting & Portfolio Supervision
-          </h2>
-          <p class="text-xs text-slate-400">Review pending credit facilities, evaluate interest spreads, and execute underwriting decisions</p>
-        </div>
-        <span class="text-xs font-mono text-slate-400">Role: Admin Authority</span>
-      </div>
-
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs">
-          <thead class="bg-slate-950 text-slate-400 uppercase font-mono border-b border-slate-800">
-            <tr>
-              <th class="py-2.5 px-3">Loan ID</th>
-              <th class="py-2.5 px-3">Customer</th>
-              <th class="py-2.5 px-3">Principal (₹)</th>
-              <th class="py-2.5 px-3">Rate / Tenure</th>
-              <th class="py-2.5 px-3">Purpose</th>
-              <th class="py-2.5 px-3">Status</th>
-              <th class="py-2.5 px-3 text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody id="loanTableBody" class="divide-y divide-slate-800 font-mono">
-            <tr><td colspan="7" class="text-center py-4 text-slate-500">Loading loan requests...</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Fraud Quarantine & Spending Analytics -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Row 1: Loan Underwriting & Spending Analytics Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       
-      <!-- Real-Time Fraud Quarantine -->
-      <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
+      <!-- Loan Underwriting & Approval Center (7 cols) -->
+      <div class="lg:col-span-7 glass-panel rounded-3xl p-6 shadow-xl space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              Real-Time Fraud Quarantine & AML Desk
+              <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              Loan Underwriting & Portfolio Supervision
             </h2>
-            <p class="text-xs text-slate-400">Replicated to MongoDB <code class="text-rose-300">fraud_alerts</code></p>
+            <p class="text-xs text-slate-400">Review credit facilities, interest spreads, and execute underwriting decisions</p>
           </div>
-          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800">High Risk Stream</span>
+          <span class="text-xs font-mono text-slate-400">Admin Authority</span>
         </div>
-        <div id="fraudList" class="space-y-3 overflow-y-auto max-h-72 pr-1"></div>
+
+        <div class="overflow-x-auto max-h-72 overflow-y-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="sticky top-0 bg-slate-950 text-slate-400 uppercase font-mono border-b border-slate-800 z-10">
+              <tr>
+                <th class="py-2.5 px-3">Loan ID</th>
+                <th class="py-2.5 px-3">Customer</th>
+                <th class="py-2.5 px-3">Principal (₹)</th>
+                <th class="py-2.5 px-3">Rate / Tenure</th>
+                <th class="py-2.5 px-3">Status</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="loanTableBody" class="divide-y divide-slate-800/80 font-mono">
+              <tr><td colspan="6" class="text-center py-6 text-slate-500">Loading loan requests...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <!-- Razor-Sharp Vector Spending Analytics (MongoDB Aggregation) -->
-      <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
+      <!-- Razor-Sharp Vector Spending Analytics (5 cols) -->
+      <div class="lg:col-span-5 glass-panel rounded-3xl p-6 shadow-xl space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
               <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
-              Spending Analytics (MongoDB Aggregation)
+              Spending Analytics
             </h2>
-            <p class="text-xs text-slate-400">Pipeline: `$group` ➔ `$sum` ➔ `$sort`</p>
+            <p class="text-xs text-slate-400">MongoDB Pipeline: `$group` ➔ `$sum` ➔ `$sort`</p>
           </div>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Live Mongo Data</span>
         </div>
         <!-- Pure Vector Bar Chart Container: Razor sharp on all DPI displays -->
-        <div id="chartContainer" class="h-72 relative"></div>
+        <div id="chartContainer" class="h-64 relative"></div>
       </div>
 
     </div>
 
-    <!-- Account Freeze Controls & Login Audit Trail -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Row 2: Fraud Quarantine & Compliance Supervision Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
       
-      <!-- Account Freeze Supervision -->
-      <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
-        <div class="border-b border-slate-800 pb-3">
-          <h2 class="text-base font-bold text-white">Customer Account Compliance & Freeze Controls</h2>
-          <p class="text-xs text-slate-400">Restricted stored procedure <code class="text-purple-300">public.set_account_status</code></p>
+      <!-- Real-Time Fraud Quarantine (6 cols) -->
+      <div class="lg:col-span-6 glass-panel rounded-3xl p-6 shadow-xl space-y-4">
+        <div class="flex justify-between items-center border-b border-slate-800 pb-3">
+          <div>
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Real-Time Fraud Quarantine Desk
+            </h2>
+            <p class="text-xs text-slate-400">Replicated to MongoDB <code class="text-rose-300">fraud_alerts</code></p>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800">Risk Stream</span>
         </div>
-        <div id="adminAccountsList" class="space-y-2.5 overflow-y-auto max-h-72 pr-1"></div>
+        <div id="fraudList" class="space-y-3 overflow-y-auto max-h-72 pr-1"></div>
       </div>
 
-      <!-- Security Login Trail -->
-      <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
-        <div class="border-b border-slate-800 pb-3">
-          <h2 class="text-base font-bold text-white">Authentication & Brute-Force Surveillance</h2>
-          <p class="text-xs text-slate-400">MongoDB `login_events` audit trail</p>
+      <!-- Compliance Freeze Controls & Login Audit (6 cols) -->
+      <div class="lg:col-span-6 space-y-6">
+        
+        <!-- Account Freeze Supervision -->
+        <div class="glass-panel rounded-3xl p-6 shadow-xl space-y-3">
+          <div class="border-b border-slate-800 pb-2.5">
+            <h2 class="text-base font-bold text-white">Customer Account Compliance & Freeze Controls</h2>
+            <p class="text-xs text-slate-400">Procedure <code class="text-purple-300">public.set_account_status</code></p>
+          </div>
+          <div id="adminAccountsList" class="space-y-2 overflow-y-auto max-h-40 pr-1"></div>
         </div>
-        <div id="loginEventsList" class="space-y-2 overflow-y-auto max-h-72 pr-1"></div>
+
+        <!-- Security Login Trail -->
+        <div class="glass-panel rounded-3xl p-6 shadow-xl space-y-3">
+          <div class="border-b border-slate-800 pb-2.5">
+            <h2 class="text-base font-bold text-white">Authentication & Brute-Force Surveillance</h2>
+            <p class="text-xs text-slate-400">MongoDB `login_events` audit trail</p>
+          </div>
+          <div id="loginEventsList" class="space-y-2 overflow-y-auto max-h-40 pr-1"></div>
+        </div>
+
       </div>
 
     </div>
@@ -1324,7 +1454,7 @@ ADMIN_HTML = """<!DOCTYPE html>
     function logout() {
       localStorage.removeItem('sb_token');
       localStorage.removeItem('sb_user');
-      window.location.href = '/login';
+      window.location.href = '/login?msg=signed_out';
     }
 
     async function loadAdminPortal() {
@@ -1336,11 +1466,30 @@ ADMIN_HTML = """<!DOCTYPE html>
         return;
       }
 
-      const user = JSON.parse(userStr);
+      let user;
+      try {
+        user = JSON.parse(userStr);
+      } catch (e) {
+        logout();
+        return;
+      }
+
       if (user.role !== 'Admin') {
         window.location.href = '/customer';
         return;
       }
+
+      // Verify token
+      try {
+        const verifyRes = await fetch('/auth/me', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (verifyRes.status === 401 || verifyRes.status === 403) {
+          logout();
+          return;
+        }
+      } catch (e) {}
+
+      const badge = document.getElementById('adminUsernameBadge');
+      if (badge) badge.innerText = `${user.username} (Admin)`;
 
       try {
         // 1. KPIs
@@ -1356,6 +1505,7 @@ ADMIN_HTML = """<!DOCTYPE html>
 
         // 2. Loans
         const loansRes = await fetch('/loans/admin/all', { headers: { 'Authorization': `Bearer ${token}` } });
+        if (loansRes.status === 401) { logout(); return; }
         if (loansRes.ok) {
           const lData = await loansRes.json();
           renderLoansTable(lData.loans || []);
@@ -1384,7 +1534,7 @@ ADMIN_HTML = """<!DOCTYPE html>
     function renderLoansTable(loans) {
       const tbody = document.getElementById('loanTableBody');
       if (!loans.length) {
-        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-slate-500">No loan applications found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-slate-500">No loan applications found.</td></tr>`;
         return;
       }
       tbody.innerHTML = loans.map(l => {
@@ -1395,9 +1545,8 @@ ADMIN_HTML = """<!DOCTYPE html>
             <td class="py-2.5 px-3 font-medium text-white">${l.applicant_username || 'User #' + l.user_id}</td>
             <td class="py-2.5 px-3 font-bold text-amber-400">₹${parseFloat(l.loan_amount).toLocaleString()}</td>
             <td class="py-2.5 px-3 text-slate-400">${l.interest_rate}% • ${l.tenure_months}m</td>
-            <td class="py-2.5 px-3 text-slate-300">${l.purpose}</td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.status === 'Active' ? 'bg-emerald-950 text-emerald-300' : (l.status === 'Rejected' ? 'bg-rose-950 text-rose-300' : 'bg-amber-950 text-amber-300')}">
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.status === 'Active' ? 'bg-emerald-950 text-emerald-300 border border-emerald-800/40' : (l.status === 'Rejected' ? 'bg-rose-950 text-rose-300 border border-rose-800/40' : 'bg-amber-950 text-amber-300 border border-amber-800/40')}">
                 ${l.status}
               </span>
             </td>
@@ -1434,7 +1583,7 @@ ADMIN_HTML = """<!DOCTYPE html>
       }
     }
 
-    // Razor-Sharp Vector Chart Rendering (Pure HTML/CSS/SVG - No canvas raster blur)
+    // Razor-Sharp Vector Chart Rendering (Pure HTML/CSS/SVG)
     function renderChart(spending) {
       const container = document.getElementById('chartContainer');
       if (!container) return;
@@ -1479,7 +1628,7 @@ ADMIN_HTML = """<!DOCTYPE html>
           <!-- Plot Area with Grid -->
           <div class="flex-1 relative flex">
             <!-- Y-Axis Ticks -->
-            <div class="w-14 flex flex-col justify-between text-right pr-3 font-mono text-[10px] text-slate-400 py-1">
+            <div class="w-12 flex flex-col justify-between text-right pr-2.5 font-mono text-[9px] text-slate-400 py-1">
               ${steps.map(s => `<span>${s.label}</span>`).join('')}
             </div>
 
@@ -1491,20 +1640,20 @@ ADMIN_HTML = """<!DOCTYPE html>
               </div>
 
               <!-- Bars Flex Row -->
-              <div class="absolute inset-0 flex items-end justify-around px-4 pt-3">
+              <div class="absolute inset-0 flex items-end justify-around px-3 pt-3">
                 ${items.map((item, idx) => {
                   const color = colors[idx % colors.length];
                   const heightPct = Math.max(Math.min((item.total / ceiling) * 100, 100), 5);
                   return `
-                    <div class="group relative flex-1 max-w-[72px] h-full flex flex-col justify-end items-center mx-1">
+                    <div class="group relative flex-1 max-w-[64px] h-full flex flex-col justify-end items-center mx-1">
                       <!-- Hover Popup Card -->
-                      <div class="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-14 z-30 pointer-events-none bg-slate-950 text-white border border-slate-700 px-3 py-1.5 rounded-xl shadow-2xl text-center whitespace-nowrap transform -translate-y-1">
-                        <p class="text-[10px] text-slate-400 font-medium">${item.name}</p>
+                      <div class="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-12 z-30 pointer-events-none bg-slate-950 text-white border border-slate-700 px-2.5 py-1 rounded-xl shadow-2xl text-center whitespace-nowrap transform -translate-y-1">
+                        <p class="text-[9px] text-slate-400 font-medium">${item.name}</p>
                         <p class="text-xs font-bold font-mono text-emerald-400">₹${item.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
                       </div>
 
                       <!-- Metric on Bar Top -->
-                      <span class="text-[10px] font-mono font-bold text-slate-300 mb-1.5 group-hover:text-emerald-300 transition">
+                      <span class="text-[9px] font-mono font-bold text-slate-300 mb-1 group-hover:text-emerald-300 transition">
                         ₹${item.total >= 1000 ? (item.total/1000).toFixed(1) + 'k' : item.total}
                       </span>
 
@@ -1519,13 +1668,13 @@ ADMIN_HTML = """<!DOCTYPE html>
           </div>
 
           <!-- X-Axis Labels Row -->
-          <div class="flex pl-14 pt-2.5">
-            <div class="flex-1 flex justify-around px-4">
+          <div class="flex pl-12 pt-2">
+            <div class="flex-1 flex justify-around px-3">
               ${items.map(item => {
-                const shortName = item.name.length > 15 ? item.name.slice(0, 13) + '…' : item.name;
+                const shortName = item.name.length > 12 ? item.name.slice(0, 10) + '…' : item.name;
                 return `
-                  <div class="flex-1 max-w-[72px] text-center mx-1" title="${item.name}">
-                    <span class="text-[11px] font-semibold text-slate-300 block truncate hover:text-white transition">
+                  <div class="flex-1 max-w-[64px] text-center mx-1" title="${item.name}">
+                    <span class="text-[10px] font-semibold text-slate-300 block truncate hover:text-white transition">
                       ${shortName}
                     </span>
                   </div>
@@ -1540,14 +1689,14 @@ ADMIN_HTML = """<!DOCTYPE html>
     function renderFraud(alerts) {
       const c = document.getElementById('fraudList');
       if (!alerts.length) {
-        c.innerHTML = `<p class="text-xs text-slate-500 py-4 text-center">No open alerts.</p>`;
+        c.innerHTML = `<p class="text-xs text-slate-500 py-6 text-center">No open alerts.</p>`;
         return;
       }
       c.innerHTML = alerts.map(a => `
         <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between items-start text-xs">
           <div>
             <div class="flex items-center gap-2">
-              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${a.severity === 'CRITICAL' ? 'bg-rose-950 text-rose-300' : 'bg-amber-950 text-amber-300'}">${a.severity}</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${a.severity === 'CRITICAL' ? 'bg-rose-950 text-rose-300 border border-rose-800/40' : 'bg-amber-950 text-amber-300 border border-amber-800/40'}">${a.severity}</span>
               <span class="font-bold text-white">${a.category}</span>
             </div>
             <p class="text-slate-400 mt-1">${a.reason}</p>
@@ -1660,7 +1809,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 sm:p-8">
 
-  <header class="w-full max-w-7xl mx-auto flex justify-between items-center py-4 border-b border-slate-800">
+  <header class="w-full max-w-6xl mx-auto flex justify-between items-center py-4 border-b border-slate-800">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
         <svg class="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
@@ -1672,12 +1821,12 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         <p class="text-xs text-slate-400">SecureBank Intelligence Center • PostgreSQL ACID Core • MongoDB Outbox Replicator</p>
       </div>
     </div>
-    <a href="/login" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition">
+    <a href="/login" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20">
       Go to Login Page →
     </a>
   </header>
 
-  <main class="w-full max-w-7xl mx-auto my-auto py-10 space-y-8">
+  <main class="w-full max-w-5xl mx-auto my-auto py-10 space-y-8">
     <div class="text-center space-y-2">
       <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">Dedicated Role Portals</span>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Access Your Banking Environment</h2>
@@ -1723,7 +1872,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     </div>
   </main>
 
-  <footer class="w-full max-w-7xl mx-auto text-center py-4 border-t border-slate-900 text-xs text-slate-500 font-mono">
+  <footer class="w-full max-w-6xl mx-auto text-center py-4 border-t border-slate-900 text-xs text-slate-500 font-mono">
     SecureBank Enterprise • Dual-Engine Architecture
   </footer>
 
