@@ -1,6 +1,8 @@
+import random
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_current_user, require_admin
 from backend.app.postgres import get_postgres_connection
@@ -9,12 +11,22 @@ from backend.app.postgres import get_postgres_connection
 router = APIRouter(prefix="/accounts", tags=["Accounts"])
 
 
+class OpenAccountRequest(BaseModel):
+    account_type: str = Field(default="Savings", description="Savings, Checking, Investment, Business")
+    initial_balance: Decimal = Field(default=Decimal("1000.00"), ge=0, max_digits=19, decimal_places=4)
+    currency: str = Field(default="INR", max_length=3)
+
+
+class AccountStatusRequest(BaseModel):
+    status: str = Field(..., description="Active, Frozen, Closed")
+
+
 def mask_account_number(account_number: str) -> str:
     """Show only the last four digits of an account number."""
     return "*" * max(0, len(account_number) - 4) + account_number[-4:]
 
 
-def format_account(row: tuple) -> dict:
+def format_account(row: tuple, mask: bool = True) -> dict:
     """Convert a database account row into a safe API response."""
     (
         account_id,
@@ -27,7 +39,8 @@ def format_account(row: tuple) -> dict:
 
     return {
         "account_id": account_id,
-        "account_number": mask_account_number(account_number),
+        "account_number": mask_account_number(account_number) if mask else account_number,
+        "raw_account_number": account_number,
         "account_type": account_type,
         "balance": str(Decimal(balance)),
         "currency": currency,
@@ -67,6 +80,75 @@ def get_my_accounts(
     }
 
 
+@router.post("/open", status_code=status.HTTP_201_CREATED)
+def open_new_account(
+    request: OpenAccountRequest,
+    current_user: dict = Depends(get_current_user),
+):
+    require_customer(current_user)
+
+    acc_num = f"SBIN{random.randint(1000000000, 9999999999)}"
+
+    with get_postgres_connection() as connection:
+        try:
+            row = connection.execute(
+                """
+                SELECT account_id, user_id, account_number, account_type, balance, currency, status
+                FROM public.open_account(%s, %s, %s, %s, %s)
+                """,
+                (
+                    current_user["user_id"],
+                    acc_num,
+                    request.account_type,
+                    request.initial_balance,
+                    request.currency,
+                ),
+            ).fetchone()
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Failed to open account: {str(exc)}",
+            )
+
+    return {
+        "message": f"Successfully opened new {request.account_type} account",
+        "account": {
+            "account_id": row[0],
+            "user_id": row[1],
+            "account_number": row[2],
+            "account_type": row[3],
+            "balance": str(Decimal(row[4])),
+            "currency": row[5],
+            "status": row[6],
+        },
+    }
+
+
+@router.get("/recipients")
+def get_transfer_recipients(current_user: dict = Depends(get_current_user)):
+    """Returns all active customer accounts across the bank for transfers."""
+    require_customer(current_user)
+
+    with get_postgres_connection() as connection:
+        rows = connection.execute(
+            """
+            SELECT account_id, account_number, account_type, owner_username
+            FROM public.get_transfer_recipients();
+            """
+        ).fetchall()
+
+    recipients = []
+    for r in rows:
+        recipients.append({
+            "account_id": r[0],
+            "account_number": r[1],
+            "account_type": r[2],
+            "owner_username": r[3],
+        })
+
+    return {"recipients": recipients}
+
+
 @router.get("/{account_id}")
 def get_account(
     account_id: int,
@@ -100,6 +182,32 @@ def get_account(
     return {"account": format_account(row)}
 
 
+@router.patch("/{account_id}/status")
+def update_account_status(
+    account_id: int,
+    request: AccountStatusRequest,
+    current_user: dict = Depends(require_admin),
+):
+    """Admin function to Freeze, Unfreeze, or Close an account."""
+    with get_postgres_connection() as connection:
+        try:
+            connection.execute(
+                "SELECT public.set_account_status(%s, %s)",
+                (account_id, request.status)
+            )
+        except Exception as exc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Unable to update account status: {str(exc)}"
+            )
+
+    return {
+        "message": f"Account {account_id} status updated to {request.status}",
+        "account_id": account_id,
+        "status": request.status,
+    }
+
+
 @router.get("/admin/all")
 def get_all_accounts(
     current_user: dict = Depends(require_admin),
@@ -123,7 +231,7 @@ def get_all_accounts(
         ).fetchone()[0]
 
     return {
-        "accounts": [format_account(row) for row in rows],
+        "accounts": [format_account(row, mask=False) for row in rows],
         "count": len(rows),
         "total": total,
         "limit": limit,
