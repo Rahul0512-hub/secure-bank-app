@@ -102,44 +102,50 @@ def get_my_transactions(
 
     user_id = current_user["user_id"]
 
-    with get_postgres_connection() as connection:
-        rows = connection.execute(
-            """
-            SELECT
-                t.transaction_id,
-                t.source_account_id,
-                t.destination_account_id,
-                t.amount,
-                t.transaction_type,
-                t.description,
-                t.status,
-                t.created_at
-            FROM public.transactions AS t
-            JOIN public.accounts AS source
-                ON source.account_id = t.source_account_id
-            JOIN public.accounts AS destination
-                ON destination.account_id = t.destination_account_id
-            WHERE source.user_id = %s
-               OR destination.user_id = %s
-            ORDER BY t.created_at DESC, t.transaction_id DESC
-            LIMIT %s OFFSET %s
-            """,
-            (user_id, user_id, limit, offset),
-        ).fetchall()
+    try:
+        with get_postgres_connection() as connection:
+            rows = connection.execute(
+                """
+                SELECT
+                    t.transaction_id,
+                    t.source_account_id,
+                    t.destination_account_id,
+                    t.amount,
+                    t.transaction_type,
+                    t.description,
+                    t.status,
+                    t.created_at
+                FROM public.transactions AS t
+                JOIN public.accounts AS source
+                    ON source.account_id = t.source_account_id
+                JOIN public.accounts AS destination
+                    ON destination.account_id = t.destination_account_id
+                WHERE source.user_id = %s
+                   OR destination.user_id = %s
+                ORDER BY t.created_at DESC, t.transaction_id DESC
+                LIMIT %s OFFSET %s
+                """,
+                (user_id, user_id, limit, offset),
+            ).fetchall()
 
-        total = connection.execute(
-            """
-            SELECT COUNT(*)
-            FROM public.transactions AS t
-            JOIN public.accounts AS source
-                ON source.account_id = t.source_account_id
-            JOIN public.accounts AS destination
-                ON destination.account_id = t.destination_account_id
-            WHERE source.user_id = %s
-               OR destination.user_id = %s
-            """,
-            (user_id, user_id),
-        ).fetchone()[0]
+            total = connection.execute(
+                """
+                SELECT COUNT(*)
+                FROM public.transactions AS t
+                JOIN public.accounts AS source
+                    ON source.account_id = t.source_account_id
+                JOIN public.accounts AS destination
+                    ON destination.account_id = t.destination_account_id
+                WHERE source.user_id = %s
+                   OR destination.user_id = %s
+                """,
+                (user_id, user_id),
+            ).fetchone()[0]
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Banking service is temporarily unavailable. Please try again later.",
+        )
 
     return {
         "transactions": [format_transaction(row) for row in rows],
@@ -200,28 +206,34 @@ def get_transaction(
 
     user_id = current_user["user_id"]
 
-    with get_postgres_connection() as connection:
-        row = connection.execute(
-            """
-            SELECT
-                t.transaction_id,
-                t.source_account_id,
-                t.destination_account_id,
-                t.amount,
-                t.transaction_type,
-                t.description,
-                t.status,
-                t.created_at
-            FROM public.transactions AS t
-            JOIN public.accounts AS source
-                ON source.account_id = t.source_account_id
-            JOIN public.accounts AS destination
-                ON destination.account_id = t.destination_account_id
-            WHERE t.transaction_id = %s
-              AND (source.user_id = %s OR destination.user_id = %s)
-            """,
-            (transaction_id, user_id, user_id),
-        ).fetchone()
+    try:
+        with get_postgres_connection() as connection:
+            row = connection.execute(
+                """
+                SELECT
+                    t.transaction_id,
+                    t.source_account_id,
+                    t.destination_account_id,
+                    t.amount,
+                    t.transaction_type,
+                    t.description,
+                    t.status,
+                    t.created_at
+                FROM public.transactions AS t
+                JOIN public.accounts AS source
+                    ON source.account_id = t.source_account_id
+                JOIN public.accounts AS destination
+                    ON destination.account_id = t.destination_account_id
+                WHERE t.transaction_id = %s
+                  AND (source.user_id = %s OR destination.user_id = %s)
+                """,
+                (transaction_id, user_id, user_id),
+            ).fetchone()
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Banking service is temporarily unavailable. Please try again later.",
+        )
 
     if row is None:
         raise HTTPException(

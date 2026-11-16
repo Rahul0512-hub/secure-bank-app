@@ -1,4 +1,5 @@
 import random
+import psycopg
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -23,6 +24,8 @@ class AccountStatusRequest(BaseModel):
 
 def mask_account_number(account_number: str) -> str:
     """Show only the last four digits of an account number."""
+    if not account_number:
+        return ""
     return "*" * max(0, len(account_number) - 4) + account_number[-4:]
 
 
@@ -62,17 +65,23 @@ def get_my_accounts(
 ):
     require_customer(current_user)
 
-    with get_postgres_connection() as connection:
-        rows = connection.execute(
-            """
-            SELECT account_id, account_number, account_type,
-                   balance, currency, status
-            FROM public.accounts
-            WHERE user_id = %s
-            ORDER BY account_id
-            """,
-            (current_user["user_id"],),
-        ).fetchall()
+    try:
+        with get_postgres_connection() as connection:
+            rows = connection.execute(
+                """
+                SELECT account_id, account_number, account_type,
+                       balance, currency, status
+                FROM public.accounts
+                WHERE user_id = %s
+                ORDER BY account_id
+                """,
+                (current_user["user_id"],),
+            ).fetchall()
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Banking service is temporarily unavailable. Please try again later.",
+        )
 
     return {
         "accounts": [format_account(row) for row in rows],
@@ -149,6 +158,43 @@ def get_transfer_recipients(current_user: dict = Depends(get_current_user)):
     return {"recipients": recipients}
 
 
+@router.get("/admin/all")
+def get_all_accounts(
+    current_user: dict = Depends(require_admin),
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+):
+    try:
+        with get_postgres_connection() as connection:
+            rows = connection.execute(
+                """
+                SELECT account_id, account_number, account_type,
+                       balance, currency, status
+                FROM public.accounts
+                ORDER BY account_id
+                LIMIT %s OFFSET %s
+                """,
+                (limit, offset),
+            ).fetchall()
+
+            total = connection.execute(
+                "SELECT COUNT(*) FROM public.accounts"
+            ).fetchone()[0]
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Banking service is temporarily unavailable. Please try again later.",
+        )
+
+    return {
+        "accounts": [format_account(row) for row in rows],
+        "count": len(rows),
+        "total": total,
+        "limit": limit,
+        "offset": offset,
+    }
+
+
 @router.get("/{account_id}")
 def get_account(
     account_id: int,
@@ -162,16 +208,22 @@ def get_account(
             detail="Account not found",
         )
 
-    with get_postgres_connection() as connection:
-        row = connection.execute(
-            """
-            SELECT account_id, account_number, account_type,
-                   balance, currency, status
-            FROM public.accounts
-            WHERE account_id = %s AND user_id = %s
-            """,
-            (account_id, current_user["user_id"]),
-        ).fetchone()
+    try:
+        with get_postgres_connection() as connection:
+            row = connection.execute(
+                """
+                SELECT account_id, account_number, account_type,
+                       balance, currency, status
+                FROM public.accounts
+                WHERE account_id = %s AND user_id = %s
+                """,
+                (account_id, current_user["user_id"]),
+            ).fetchone()
+    except psycopg.OperationalError:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Banking service is temporarily unavailable. Please try again later.",
+        )
 
     if row is None:
         raise HTTPException(

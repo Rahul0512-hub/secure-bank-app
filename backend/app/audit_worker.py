@@ -21,6 +21,13 @@ logger = logging.getLogger("securebank.audit_worker")
 
 def build_audit_document(outbox_id, payload):
     """Convert an outbox payload into the MongoDB audit schema."""
+    if isinstance(payload, str):
+        import json
+        try:
+            payload = json.loads(payload)
+        except Exception as exc:
+            raise ValueError(f"Outbox payload JSON decoding failed: {exc}")
+
     if not isinstance(payload, dict):
         raise ValueError("Outbox payload must be a JSON object")
 
@@ -170,6 +177,7 @@ def main():
         with psycopg.connect(
             settings.AUDIT_WORKER_DATABASE_URL,
             connect_timeout=5,
+            autocommit=True,
         ) as connection:
             logger.info("Connected to PostgreSQL as the audit worker")
 

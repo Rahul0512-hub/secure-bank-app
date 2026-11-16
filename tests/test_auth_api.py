@@ -86,6 +86,19 @@ class TestLoginAPI(unittest.TestCase):
         self.assertEqual(payload["username"], "testuser")
         self.assertEqual(payload["role"], "Customer")
 
+    def test_database_error_returns_503(self):
+        import psycopg
+        with patch("backend.app.auth.get_postgres_connection", side_effect=psycopg.OperationalError("Connection timed out")):
+            response = client.post(
+                "/auth/login",
+                json={
+                    "username": "testuser",
+                    "password": "Password@123",
+                },
+            )
+
+        self.assertEqual(response.status_code, 503)
+
 
 if __name__ == "__main__":
     unittest.main()

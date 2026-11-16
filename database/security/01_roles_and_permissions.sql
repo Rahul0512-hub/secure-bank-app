@@ -39,6 +39,16 @@ GRANT SELECT ON
     public.transactions
 TO securebank_app;
 
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'semantic_search_items'
+    ) THEN
+        GRANT SELECT ON public.semantic_search_items TO securebank_app;
+    END IF;
+END $$;
+
 -- 4. Transfer role: minimum permissions required
 --    by the transfer_funds function.
 
@@ -53,6 +63,16 @@ TO securebank_transfer;
 GRANT USAGE, SELECT
 ON SEQUENCE public.transactions_transaction_id_seq
 TO securebank_transfer;
+
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'transaction_audit_outbox'
+    ) THEN
+        GRANT INSERT ON public.transaction_audit_outbox TO securebank_transfer;
+    END IF;
+END $$;
 
 -- 5. Temporarily allow the transfer role to own
 --    the function in the public schema.

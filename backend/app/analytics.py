@@ -161,6 +161,10 @@ def get_spending_analytics():
             if isinstance(amt, Decimal128):
                 amt = float(amt.to_decimal())
             cat_name = doc["_id"] or "General Transfer"
+            elif amt is None:
+                amt = 0.0
+            else:
+                amt = float(amt)
             audit_summary.append({
                 "category": cat_name[:24],
                 "totalSpent": round(float(amt), 2),
@@ -211,7 +215,13 @@ def get_spending_analytics():
             "loginEvents": logins,
         }
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        return {
+            "spendingByCategory": [],
+            "fraudAlerts": [],
+            "loginEvents": [],
+            "status": "database_unavailable",
+            "message": f"MongoDB is currently offline or unreachable: {str(exc)}",
+        }
     finally:
         if client:
             client.close()
@@ -251,6 +261,8 @@ def evaluate_transaction_fraud(payload: SimulateEventRequest):
         now = datetime.now(timezone.utc)
 
         tx_id = int(now.timestamp())
+        # 1. Insert into Rahul's transaction_audit_logs following his strict schema
+        tx_id = int(now.timestamp() * 1000)
         audit_col.insert_one({
             "transaction_id": tx_id,
             "event_type": "TRANSFER_COMPLETED",
@@ -297,7 +309,7 @@ def evaluate_transaction_fraud(payload: SimulateEventRequest):
             "reason": reason,
         }
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=503, detail=f"MongoDB service unavailable: {str(exc)}")
     finally:
         if client:
             client.close()
@@ -312,18 +324,24 @@ def record_login_event(payload: LoginEventRequest):
         login_col = get_login_events_collection(client)
         now = datetime.now(timezone.utc)
 
+        login_status = payload.status.upper() if payload.status else "SUCCESS"
+        if login_status not in ("SUCCESS", "FAILED", "LOCKED"):
+            login_status = "SUCCESS"
+
         login_col.insert_one({
             "user_id": payload.user_id,
             "email": payload.email,
             "ip_address": payload.ip_address,
             "user_agent": "SecureBank-Web-Dashboard",
-            "status": payload.status,
+            "status": login_status,
             "occurred_at": now,
         })
 
         if payload.status == "FAILED":
+        # If 3+ failed logins recently, trigger a fraud alert!
+        if login_status == "FAILED":
             recent_fails = login_col.count_documents({"email": payload.email, "status": "FAILED"})
-            if recent_fails >= 3:
+            if isinstance(recent_fails, int) and recent_fails >= 3:
                 get_fraud_alerts_collection(client).insert_one({
                     "transaction_id": None,
                     "user_id": payload.user_id or 0,
@@ -337,7 +355,7 @@ def record_login_event(payload: LoginEventRequest):
 
         return {"status": "logged"}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=503, detail=f"MongoDB service unavailable: {str(exc)}")
     finally:
         if client:
             client.close()
@@ -375,3 +393,4 @@ def semantic_vector_search(q: str = Query(..., description="Natural language sea
                 return {"query": q, "results": results}
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"pgvector search error: {exc}")
+        raise HTTPException(status_code=503, detail=f"PostgreSQL pgvector search unavailable: {str(exc)}")

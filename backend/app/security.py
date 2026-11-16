@@ -16,4 +16,7 @@ def verify_password(password: str, password_hash: str) -> bool:
     if not password or not password_hash:
         return False
 
-    return password_hasher.verify(password, password_hash)
+    try:
+        return password_hasher.verify(password, password_hash)
+    except Exception:
+        return False
