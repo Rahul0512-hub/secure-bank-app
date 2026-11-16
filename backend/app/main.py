@@ -47,12 +47,10 @@ def root():
     return {
         "message": "Welcome to SecureBank Enterprise Banking System",
         "version": "2.0.0",
-        "status": "operational",
-        "documentation": "/docs",
-        "web_app": "/dashboard",
-        "message": "Welcome to SecureBank API",
         "status": "running",
+        "documentation": "/docs",
         "docs_url": "/docs",
+        "web_app": "/dashboard",
         "dashboard_url": "/dashboard",
     }
 

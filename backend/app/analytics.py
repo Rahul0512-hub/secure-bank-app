@@ -160,11 +160,11 @@ def get_spending_analytics():
             amt = doc.get("total_amount", 0)
             if isinstance(amt, Decimal128):
                 amt = float(amt.to_decimal())
-            cat_name = doc["_id"] or "General Transfer"
             elif amt is None:
                 amt = 0.0
             else:
                 amt = float(amt)
+            cat_name = doc.get("_id") or "General Transfer"
             audit_summary.append({
                 "category": cat_name[:24],
                 "totalSpent": round(float(amt), 2),
@@ -337,7 +337,6 @@ def record_login_event(payload: LoginEventRequest):
             "occurred_at": now,
         })
 
-        if payload.status == "FAILED":
         # If 3+ failed logins recently, trigger a fraud alert!
         if login_status == "FAILED":
             recent_fails = login_col.count_documents({"email": payload.email, "status": "FAILED"})

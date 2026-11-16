@@ -423,104 +423,78 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       </div>
     </div>
 
-    <!-- 2. Transfer Studio & AI Semantic Search -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-      
-      <!-- Transfer Studio (7 cols) -->
-      <div class="lg:col-span-7 glass-panel rounded-2xl p-6 shadow-xl space-y-5">
-        <div class="border-b border-slate-800 pb-3">
+    <!-- 2. Transfer Studio -->
+    <div class="glass-panel rounded-2xl p-7 shadow-xl space-y-6">
+      <div class="border-b border-slate-800 pb-4 flex flex-wrap justify-between items-center gap-3">
+        <div>
           <h2 class="text-lg font-bold text-white flex items-center gap-2">
             <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>
             Instant Fund Transfer
           </h2>
           <p class="text-xs text-slate-400">Atomic execution via PostgreSQL stored procedure <code class="text-emerald-300">transfer_funds</code></p>
         </div>
+        <span class="text-[10px] font-mono uppercase px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800/60 font-semibold">
+          ACID Engine • Instant Settlement
+        </span>
+      </div>
 
-        <form onsubmit="handleTransfer(event)" class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Debit From Account</label>
-              <select id="transferSource" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Send To Beneficiary</label>
-              <select id="transferDest" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
-            </div>
-          </div>
-
+      <form onsubmit="handleTransfer(event)" class="space-y-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label class="block text-xs font-medium text-slate-400 mb-1">Amount (INR ₹)</label>
-            <div class="relative">
-              <span class="absolute left-3.5 top-2.5 text-slate-400 font-mono text-base font-semibold">₹</span>
-              <input id="transferAmount" type="number" step="0.01" min="1" max="500000" placeholder="0.00" required
-                oninput="checkAmountWarning(this.value)"
-                class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 text-slate-100 font-mono font-semibold text-base focus:border-emerald-500 focus:outline-none" />
-            </div>
-            <!-- Quick Chips -->
-            <div class="flex flex-wrap gap-2 mt-2">
-              <button type="button" onclick="setAmount(1000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-800 text-slate-300 font-mono">₹1,000</button>
-              <button type="button" onclick="setAmount(5000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-800 text-slate-300 font-mono">₹5,000</button>
-              <button type="button" onclick="setAmount(15000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-800 text-slate-300 font-mono">₹15,000</button>
-              <button type="button" onclick="setAmount(50000)" class="px-2 py-0.5 text-xs rounded-lg bg-slate-800 text-amber-300 font-mono">₹50,000 (Alert Trigger)</button>
-            </div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Debit From Account</label>
+            <select id="transferSource" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
           </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
-              <select id="transferCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none">
-                <option value="Transfer">Inter-Account Transfer</option>
-                <option value="Food & Dining">Food & Dining</option>
-                <option value="Bills & Utilities">Bills & Utilities</option>
-                <option value="Travel">Travel & Lodging</option>
-                <option value="Investments">Investments</option>
-                <option value="International Wire">International Wire (High Risk)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-medium text-slate-400 mb-1">Description / Memo</label>
-              <input id="transferDesc" type="text" placeholder="e.g. Monthly rent, groceries"
-                class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none" />
-            </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Send To Beneficiary</label>
+            <select id="transferDest" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none"></select>
           </div>
-
-          <!-- Dynamic Warning -->
-          <div id="riskWarning" class="hidden p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
-            ⚠️ <strong>Risk Alert:</strong> Transfers ≥ ₹50,000 trigger velocity anomaly scoring and are replicated to MongoDB Fraud Center.
-          </div>
-
-          <button type="submit" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20">
-            Confirm & Send Transfer
-          </button>
-        </form>
-      </div>
-
-      <!-- AI Semantic Search (5 cols) -->
-      <div class="lg:col-span-5 glass-panel rounded-2xl p-6 shadow-xl space-y-4 flex flex-col">
-        <div class="border-b border-slate-800 pb-3">
-          <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <svg class="w-5 h-5 text-cyan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-            AI Semantic Statement Search
-          </h2>
-          <p class="text-xs text-slate-400">PostgreSQL 16 <code class="text-cyan-300">pgvector</code> HNSW Cosine Similarity</p>
         </div>
 
-        <form onsubmit="handleSearch(event)" class="flex gap-2">
-          <input id="searchInput" type="text" placeholder="Search by meaning: e.g. 'coffee', 'cab', 'lost card'..."
-            class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:border-cyan-500 focus:outline-none" />
-          <button type="submit" class="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-semibold text-xs transition">Search</button>
-        </form>
-
-        <div class="flex flex-wrap gap-1 text-[11px]">
-          <button onclick="runQuickSearch('Starbucks Indiranagar coffee')" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-cyan-600 text-slate-300">Coffee</button>
-          <button onclick="runQuickSearch('Airport cab ride')" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-cyan-600 text-slate-300">Airport Taxi</button>
-          <button onclick="runQuickSearch('BESCOM Electricity Bill')" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-cyan-600 text-slate-300">Bills</button>
-          <button onclick="runQuickSearch('How to block a stolen card')" class="px-2 py-0.5 rounded bg-slate-900 border border-slate-800 hover:border-cyan-600 text-slate-300">Lost Card FAQ</button>
+        <div>
+          <label class="block text-xs font-semibold text-slate-300 mb-1.5">Transfer Amount (INR ₹)</label>
+          <div class="relative">
+            <span class="absolute left-4 top-3 text-slate-400 font-mono text-base font-semibold">₹</span>
+            <input id="transferAmount" type="number" step="0.01" min="1" max="500000" placeholder="0.00" required
+              oninput="checkAmountWarning(this.value)"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl pl-9 pr-4 py-3 text-slate-100 font-mono font-semibold text-base focus:border-emerald-500 focus:outline-none" />
+          </div>
+          <!-- Quick Chips -->
+          <div class="flex flex-wrap gap-2 mt-2.5">
+            <button type="button" onclick="setAmount(1000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹1,000</button>
+            <button type="button" onclick="setAmount(5000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹5,000</button>
+            <button type="button" onclick="setAmount(15000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-mono transition">₹15,000</button>
+            <button type="button" onclick="setAmount(50000)" class="px-2.5 py-1 text-xs rounded-lg bg-slate-900 hover:bg-slate-800 border border-amber-900/50 text-amber-300 font-mono transition">₹50,000 (Alert Trigger)</button>
+          </div>
         </div>
 
-        <div id="searchResults" class="flex-1 overflow-y-auto max-h-72 space-y-2 pr-2.5"></div>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Category</label>
+            <select id="transferCategory" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none">
+              <option value="Transfer">Inter-Account Transfer</option>
+              <option value="Food & Dining">Food & Dining</option>
+              <option value="Bills & Utilities">Bills & Utilities</option>
+              <option value="Travel">Travel & Lodging</option>
+              <option value="Investments">Investments</option>
+              <option value="International Wire">International Wire (High Risk)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 mb-1.5">Description / Memo</label>
+            <input id="transferDesc" type="text" placeholder="e.g. Monthly rent, groceries"
+              class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-100 focus:border-emerald-500 focus:outline-none" />
+          </div>
+        </div>
 
+        <!-- Dynamic Warning -->
+        <div id="riskWarning" class="hidden p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs">
+          ⚠️ <strong>Risk Alert:</strong> Transfers ≥ ₹50,000 trigger velocity anomaly scoring and are replicated to MongoDB Fraud Center.
+        </div>
+
+        <button type="submit" class="w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20">
+          Confirm & Send Transfer
+        </button>
+      </form>
     </div>
 
     <!-- 3. Transaction History Table -->
@@ -911,9 +885,6 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           const lData = await lRes.json();
           renderLoans(lData.loans || []);
         }
-
-        // Initial search
-        runQuickSearch('Starbucks Coffee Indiranagar');
       } catch (err) {
         console.error(err);
       }
@@ -1171,40 +1142,6 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       }
     }
 
-    async function handleSearch(e) {
-      e.preventDefault();
-      runQuickSearch(document.getElementById('searchInput').value.trim());
-    }
-
-    async function runQuickSearch(q) {
-      if (!q) return;
-      document.getElementById('searchInput').value = q;
-      const box = document.getElementById('searchResults');
-      box.innerHTML = `<p class="text-xs text-slate-500 py-2 text-center">Searching pgvector...</p>`;
-
-      try {
-        const res = await fetch('/api/person-b/semantic-search?q=' + encodeURIComponent(q));
-        const data = await res.json();
-        box.innerHTML = (data.results || []).map(r => `
-          <div class="p-3 rounded-xl bg-slate-950/90 border border-slate-800 text-xs flex justify-between items-center gap-3 hover:border-cyan-500/40 transition">
-            <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-1.5 flex-wrap">
-                <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${r.item_type === 'FAQ' ? 'bg-purple-950 text-purple-300 border border-purple-800/50' : 'bg-cyan-950 text-cyan-300 border border-cyan-800/50'}">${r.item_type}</span>
-                <span class="font-semibold text-white truncate">${r.title}</span>
-              </div>
-              <p class="text-[11px] text-slate-400 mt-1 line-clamp-2 leading-relaxed">${r.description}</p>
-            </div>
-            <div class="shrink-0 text-right font-mono flex flex-col items-end gap-1">
-              ${r.amount ? `<span class="text-emerald-400 font-bold text-xs">₹${r.amount.toLocaleString()}</span>` : ''}
-              <span class="text-[10px] text-cyan-400 bg-cyan-950/70 border border-cyan-800/40 px-2 py-0.5 rounded-full font-semibold whitespace-nowrap">${(r.similarity * 100).toFixed(1)}% match</span>
-            </div>
-          </div>
-        `).join('') || '<p class="text-xs text-slate-500 py-4 text-center">No matching records found.</p>';
-      } catch (e) {
-        box.innerHTML = `<p class="text-xs text-rose-400 py-2 text-center">${e.message}</p>`;
-      }
-    }
-
     async function handleOpenAccount(e) {
       e.preventDefault();
       const token = localStorage.getItem('sb_token');
@@ -1413,8 +1350,8 @@ ADMIN_HTML = """<!DOCTYPE html>
           </div>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Live Mongo Data</span>
         </div>
-        <div class="h-64 relative">
-          <canvas id="adminSpendingChart"></canvas>
+        <div id="chartContainer" class="h-72 relative">
+          <!-- Razor-sharp vector chart container -->
         </div>
       </div>
 
@@ -1564,32 +1501,105 @@ ADMIN_HTML = """<!DOCTYPE html>
     }
 
     function renderChart(spending) {
-      const labels = spending.map(i => i.category);
-      const values = spending.map(i => i.totalSpent);
-      const ctx = document.getElementById('adminSpendingChart').getContext('2d');
-      if (chartInstance) chartInstance.destroy();
+      const container = document.getElementById('chartContainer');
+      if (!container) return;
 
-      chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels.length ? labels : ['No Data'],
-          datasets: [{
-            label: 'Total Spend (₹)',
-            data: values.length ? values : [0],
-            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'],
-            borderRadius: 6,
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
-          }
-        }
-      });
+      if (!spending || !spending.length) {
+        container.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-slate-500 text-xs">
+            <svg class="w-8 h-8 text-slate-600 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            No spending records found.
+          </div>
+        `;
+        return;
+      }
+
+      const items = spending.map(i => ({
+        name: (i.category || 'General').replace(/^\[(.*?)\]/, '$1').trim(),
+        total: parseFloat(i.totalSpent) || 0
+      }));
+
+      const maxVal = Math.max(...items.map(i => i.total), 1000);
+      const ceiling = Math.ceil(maxVal / 5000) * 5000 || 20000;
+
+      const colors = [
+        { from: '#10b981', to: '#059669', border: '#34d399', shadow: 'rgba(16, 185, 129, 0.25)' },
+        { from: '#3b82f6', to: '#1d4ed8', border: '#60a5fa', shadow: 'rgba(59, 130, 246, 0.25)' },
+        { from: '#f59e0b', to: '#b45309', border: '#fbbf24', shadow: 'rgba(245, 158, 11, 0.25)' },
+        { from: '#8b5cf6', to: '#6d28d9', border: '#a78bfa', shadow: 'rgba(139, 92, 246, 0.25)' },
+        { from: '#ec4899', to: '#be185d', border: '#f472b6', shadow: 'rgba(236, 72, 153, 0.25)' },
+        { from: '#06b6d4', to: '#0891b2', border: '#22d3ee', shadow: 'rgba(6, 182, 212, 0.25)' }
+      ];
+
+      const steps = [
+        { label: '₹' + (ceiling >= 1000 ? (ceiling/1000).toFixed(0) + 'k' : ceiling), pct: 100 },
+        { label: '₹' + (ceiling*0.75 >= 1000 ? (ceiling*0.75/1000).toFixed(0) + 'k' : Math.round(ceiling*0.75)), pct: 75 },
+        { label: '₹' + (ceiling*0.5 >= 1000 ? (ceiling*0.5/1000).toFixed(0) + 'k' : Math.round(ceiling*0.5)), pct: 50 },
+        { label: '₹' + (ceiling*0.25 >= 1000 ? (ceiling*0.25/1000).toFixed(0) + 'k' : Math.round(ceiling*0.25)), pct: 25 },
+        { label: '₹0', pct: 0 }
+      ];
+
+      container.innerHTML = `
+        <div class="h-full flex flex-col justify-between select-none font-sans">
+          <!-- Plot Area with Grid -->
+          <div class="flex-1 relative flex">
+            <!-- Y-Axis Ticks -->
+            <div class="w-14 flex flex-col justify-between text-right pr-3 font-mono text-[10px] text-slate-400 py-1">
+              ${steps.map(s => `<span>${s.label}</span>`).join('')}
+            </div>
+
+            <!-- Graph Area -->
+            <div class="flex-1 relative border-l border-b border-slate-700/80">
+              <!-- Crisp Horizontal Gridlines -->
+              <div class="absolute inset-0 flex flex-col justify-between pointer-events-none py-1">
+                ${steps.map(() => `<div class="w-full border-b border-slate-800/80"></div>`).join('')}
+              </div>
+
+              <!-- Bars Flex Row -->
+              <div class="absolute inset-0 flex items-end justify-around px-4 pt-3">
+                ${items.map((item, idx) => {
+                  const color = colors[idx % colors.length];
+                  const heightPct = Math.max(Math.min((item.total / ceiling) * 100, 100), 5);
+                  return `
+                    <div class="group relative flex-1 max-w-[72px] h-full flex flex-col justify-end items-center mx-1">
+                      <!-- Hover Popup Card -->
+                      <div class="opacity-0 group-hover:opacity-100 transition-all duration-200 absolute -top-14 z-30 pointer-events-none bg-slate-950 text-white border border-slate-700 px-3 py-1.5 rounded-xl shadow-2xl text-center whitespace-nowrap transform -translate-y-1">
+                        <p class="text-[10px] text-slate-400 font-medium">${item.name}</p>
+                        <p class="text-xs font-bold font-mono text-emerald-400">₹${item.total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</p>
+                      </div>
+
+                      <!-- Metric on Bar Top -->
+                      <span class="text-[10px] font-mono font-bold text-slate-300 mb-1.5 group-hover:text-emerald-300 transition">
+                        ₹${item.total >= 1000 ? (item.total/1000).toFixed(1) + 'k' : item.total}
+                      </span>
+
+                      <!-- Vector Gradient Bar -->
+                      <div style="height: ${heightPct}%; background: linear-gradient(180deg, ${color.from} 0%, ${color.to} 100%); border-top: 2px solid ${color.border}; box-shadow: 0 4px 14px ${color.shadow};"
+                           class="w-full rounded-t-lg transition-all duration-300 group-hover:brightness-125"></div>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          <!-- X-Axis Labels Row -->
+          <div class="flex pl-14 pt-2.5">
+            <div class="flex-1 flex justify-around px-4">
+              ${items.map(item => {
+                const shortName = item.name.length > 15 ? item.name.slice(0, 13) + '…' : item.name;
+                return `
+                  <div class="flex-1 max-w-[72px] text-center mx-1" title="${item.name}">
+                    <span class="text-[11px] font-semibold text-slate-300 block truncate hover:text-white transition">
+                      ${shortName}
+                    </span>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function renderFraud(alerts) {
@@ -1958,7 +1968,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       </div>
       <div>
         <h1 class="text-xl font-bold text-white tracking-tight">Secure<span class="text-emerald-400">Bank</span> Enterprise Core</h1>
-        <p class="text-xs text-slate-400">PostgreSQL ACID Core • MongoDB Outbox Replicator • pgvector</p>
+        <p class="text-xs text-slate-400">SecureBank Intelligence Center • PostgreSQL ACID Core • MongoDB Outbox Replicator</p>
       </div>
     </div>
     <a href="/login" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition">
@@ -2054,5 +2064,4 @@ def get_admin_page():
 @router.get("/dashboard", response_class=HTMLResponse)
 def get_banking_dashboard():
     """Gateway Portal that routes to Customer or Admin."""
-def get_person_b_dashboard():
     return DASHBOARD_HTML
