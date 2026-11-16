@@ -12,7 +12,6 @@ LOGIN_HTML = """<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign In — SecureBank Enterprise</title>
-  <title>SecureBank — Analytics, Vector Search & Fraud Center</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,13 +19,6 @@ LOGIN_HTML = """<!DOCTYPE html>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #070b14; color: #f1f5f9; }
     .glass-card { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(16px); border: 1px solid rgba(51, 65, 85, 0.6); }
-
-    /* Custom Sleek Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: #090d16; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #475569; }
-    * { scrollbar-width: thin; scrollbar-color: #334155 #090d16; }
   </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
@@ -109,24 +101,23 @@ LOGIN_HTML = """<!DOCTYPE html>
       <p class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400 text-center">Quick Demo Credentials:</p>
       
       <div class="grid grid-cols-2 gap-2 text-xs">
-        <button type="button" onclick="fillCreds('priya_sharma', 'CustomerPass@123')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500 text-left transition">
-          <span class="font-bold text-white block">👤 Priya Sharma</span>
-          <span class="text-[10px] text-emerald-400 font-mono">Customer (₹7.5L)</span>
+        <button type="button" onclick="fillCreds('priya_sharma', 'CustomerPass@123')" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500 text-left transition flex items-center justify-between">
+          <div>
+            <span class="font-bold text-white block">👤 Customer</span>
+            <span class="text-[10px] text-emerald-400 font-mono">priya_sharma</span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-950 text-emerald-300">User</span>
         </button>
 
-        <button type="button" onclick="fillCreds('arun_kumar', 'CustomerPass@123')" class="p-2 rounded-xl bg-slate-900 border border-slate-800 hover:border-blue-500 text-left transition">
-          <span class="font-bold text-white block">👤 Arun Kumar</span>
-          <span class="text-[10px] text-blue-400 font-mono">Customer (₹85K)</span>
+        <button type="button" onclick="fillCreds('bank_admin', 'AdminPass@123')" class="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-purple-500 text-left transition flex items-center justify-between">
+          <div>
+            <span class="font-bold text-white block">🏦 Bank Admin</span>
+            <span class="text-[10px] text-purple-300 font-mono">bank_admin</span>
+          </div>
+          <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-900 text-purple-200">Admin</span>
         </button>
       </div>
 
-      <button type="button" onclick="fillCreds('admin', 'AdminPassword@123')" class="w-full p-2.5 rounded-xl bg-purple-950/40 border border-purple-800/60 hover:border-purple-500 text-left transition flex justify-between items-center text-xs">
-        <div>
-          <span class="font-bold text-white block">🏦 Bank Administrator</span>
-          <span class="text-[10px] text-purple-300 font-mono">Risk Office & Underwriting Authority</span>
-        </div>
-        <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-purple-900 text-purple-200">Admin</span>
-      </button>
     </div>
 
   </div>
@@ -268,36 +259,17 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(14px); border: 1px solid rgba(51, 65, 85, 0.6); }
     .glass-card { background: linear-gradient(135deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.8) 100%); border: 1px solid rgba(71, 85, 105, 0.4); }
 
-    /* Custom Sleek Dark Scrollbar - Prevents browser default overlap */
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #090d16;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #334155;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #475569;
-    }
-    * {
-      scrollbar-width: thin;
-      scrollbar-color: #334155 #090d16;
-    }
+    /* Custom Sleek Dark Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    * { scrollbar-width: thin; scrollbar-color: #334155 #090d16; }
 
     /* Print media styling: Only print the clean statement sheet */
     @media print {
-      body {
-        background: #ffffff !important;
-        color: #0f172a !important;
-      }
-      header, main, #toastContainer, #newAccountModal, #applyLoanModal, .no-print {
-        display: none !important;
-      }
+      body { background: #ffffff !important; color: #0f172a !important; }
+      header, main, #toastContainer, #newAccountModal, #applyLoanModal, .no-print { display: none !important; }
       #printableStatementArea {
         display: block !important;
         position: absolute;
@@ -314,9 +286,9 @@ CUSTOMER_HTML = """<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Top Navbar -->
-  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+  <!-- Top Navbar - Full Width Screen -->
+  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-10 py-3.5">
+    <div class="w-full flex items-center justify-between gap-4">
       
       <!-- Brand -->
       <div class="flex items-center gap-3">
@@ -338,7 +310,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           <span id="navUsername" class="font-bold text-slate-200">Customer</span>
           <span class="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-300">Customer</span>
         </div>
-        <button onclick="logout()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+        <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
           Sign Out
         </button>
       </div>
@@ -349,8 +321,8 @@ CUSTOMER_HTML = """<!DOCTYPE html>
   <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-  <!-- Main Content -->
-  <main class="flex-1 max-w-7xl mx-auto w-full p-4 lg:p-8 space-y-8">
+  <!-- Main Content - Fits Whole Laptop Screen -->
+  <main class="flex-1 w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 space-y-8">
     
     <!-- Hero Summary Bar -->
     <div class="rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-emerald-950/40 border border-slate-800 p-6 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -363,51 +335,8 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           <span class="text-[11px] font-semibold uppercase text-slate-400 block">Total Net Balance</span>
           <span id="heroTotalBalance" class="text-2xl font-black text-white font-mono">₹0.00</span>
         </div>
-        <button onclick="openNewAccountModal()" class="px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition">
+        <button onclick="openNewAccountModal()" class="px-3.5 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-bold transition">
           + Open Account
-<body class="bg-slate-950 text-slate-100 min-h-screen p-6">
-  <div class="max-w-7xl mx-auto space-y-6">
-    <!-- Header -->
-    <div class="flex flex-wrap justify-between items-center border-b border-slate-800 pb-4 gap-4">
-      <div>
-        <div class="flex items-center gap-3">
-          <h1 class="text-3xl font-bold text-white tracking-tight">SecureBank Intelligence Center</h1>
-          <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-blue-900/60 text-blue-300 border border-blue-700">v1.0</span>
-        </div>
-        <p class="text-slate-400 text-sm mt-1">MongoDB Audit & Aggregation • pgvector Semantic Search • Real-Time Fraud Engine</p>
-      </div>
-
-      <!-- Live Health Status Indicators & Docs Link -->
-      <div class="flex items-center gap-3 flex-wrap">
-        <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs">
-          <span class="text-slate-400">PostgreSQL:</span>
-          <span id="pgStatus" class="font-medium text-slate-400">Checking...</span>
-        </div>
-        <div class="flex items-center gap-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-lg text-xs">
-          <span class="text-slate-400">MongoDB:</span>
-          <span id="mongoStatus" class="font-medium text-slate-400">Checking...</span>
-        </div>
-        <a href="/docs" target="_blank" class="text-xs bg-slate-800 hover:bg-slate-700 text-slate-200 px-3 py-1.5 rounded-lg border border-slate-700 font-medium">
-          API Docs &rarr;
-        </a>
-      </div>
-    </div>
-
-    <!-- Interactive Simulation Controls -->
-    <div class="bg-slate-900/80 border border-slate-800 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3">
-      <div class="text-sm">
-        <span class="font-semibold text-slate-200">Interactive Simulation:</span>
-        <span class="text-slate-400 ml-2">Trigger test transactions, high-value transfers, and security anomalies</span>
-      </div>
-      <div class="flex flex-wrap gap-2">
-        <button onclick="simulateTx(1450, 'Food & Dining', 'Cafe Coffee Day Indiranagar')" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-sm px-3.5 py-2 rounded-lg font-medium transition shadow">
-          + Normal Spend (₹1,450)
-        </button>
-        <button onclick="simulateTx(85000, 'International Wire', 'Offshore Crypto Exchange Transfer')" class="bg-rose-600 hover:bg-rose-500 text-white text-xs sm:text-sm px-3.5 py-2 rounded-lg font-medium transition shadow">
-          + Trigger Fraud Alert (₹85,000)
-        </button>
-        <button onclick="simulateFailedLogin()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs sm:text-sm px-3.5 py-2 rounded-lg font-medium transition shadow">
-          + Simulate Failed Login
         </button>
       </div>
     </div>
@@ -416,7 +345,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     <div>
       <h2 class="text-base font-bold text-white mb-3 flex items-center gap-2">
         <span>My Accounts</span>
-        <span class="text-xs font-normal text-slate-400">(Encrypted in PostgreSQL `accounts` table)</span>
+        <span class="text-xs font-normal text-slate-400">(Encrypted in PostgreSQL accounts table)</span>
       </h2>
       <div id="accountsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- Populated via JS -->
@@ -575,29 +504,30 @@ CUSTOMER_HTML = """<!DOCTYPE html>
             </div>
             <input type="range" id="tSlider" min="6" max="120" step="6" value="36" oninput="recalcEMI()" class="w-full accent-amber-500 bg-slate-900 rounded-lg cursor-pointer" />
           </div>
+        </div>
 
-          <div class="grid grid-cols-3 gap-3 pt-2 text-center">
-            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span class="text-[10px] text-slate-400 uppercase block font-semibold">Monthly EMI</span>
-              <span id="resEMI" class="text-base font-bold text-amber-400 font-mono">₹15,783</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span class="text-[10px] text-slate-400 uppercase block font-semibold">Total Interest</span>
-              <span id="resInterest" class="text-base font-bold text-slate-200 font-mono">₹68,188</span>
-            </div>
-            <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800">
-              <span class="text-[10px] text-slate-400 uppercase block font-semibold">Total Payable</span>
-              <span id="resTotal" class="text-base font-bold text-emerald-400 font-mono">₹5,68,188</span>
-            </div>
+        <!-- Calculated Summary -->
+        <div class="grid grid-cols-3 gap-3 p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-center">
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Monthly EMI</span>
+            <span id="resEMI" class="text-sm font-bold text-amber-400 font-mono">₹15,780</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Total Interest</span>
+            <span id="resInterest" class="text-sm font-bold text-slate-300 font-mono">₹68,080</span>
+          </div>
+          <div>
+            <span class="text-[10px] text-slate-400 uppercase block font-semibold">Total Payable</span>
+            <span id="resTotal" class="text-sm font-bold text-white font-mono">₹5,68,080</span>
           </div>
         </div>
       </div>
 
       <!-- Active Loans (5 cols) -->
-      <div class="lg:col-span-5 glass-panel rounded-2xl p-6 shadow-xl space-y-4">
-        <div class="border-b border-slate-800 pb-3">
-          <h2 class="text-base font-bold text-white">My Active Credit Facilities</h2>
-          <p class="text-xs text-slate-400">PostgreSQL `loans` table</p>
+      <div class="lg:col-span-5 glass-panel rounded-2xl p-6 shadow-xl space-y-4 flex flex-col justify-between">
+        <div class="border-b border-slate-800 pb-3 flex justify-between items-center">
+          <h2 class="text-base font-bold text-white">Active Facility Portfolio</h2>
+          <span class="text-[10px] font-mono text-slate-400">Approved via Admin Desk</span>
         </div>
         <div id="customerLoansList" class="space-y-2.5 overflow-y-auto max-h-64"></div>
       </div>
@@ -645,7 +575,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
         <div style="margin-bottom:24px;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
             <p style="font-size:11px; font-weight:700; text-transform:uppercase; color:#0f172a; margin:0; letter-spacing:0.5px;">Transaction Ledger</p>
-            <span style="font-size:10px; color:#64748b; font-family:monospace;">PostgreSQL ACID Table: `transactions`</span>
+            <span style="font-size:10px; color:#64748b; font-family:monospace;">PostgreSQL ACID Table: transactions</span>
           </div>
           <table style="width:100%; border-collapse:collapse; font-size:10.5px;">
             <thead>
@@ -681,36 +611,6 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           </p>
         </div>
 
-    <!-- Alert / Toast Banner -->
-    <div id="toastBanner" class="hidden p-3.5 rounded-lg border text-sm transition"></div>
-
-    <!-- 1. Smart Semantic Search (pgvector) -->
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
-      <div class="flex justify-between items-center mb-2">
-        <h2 class="text-lg font-semibold text-blue-400">1. Smart Semantic Search (PostgreSQL pgvector)</h2>
-        <span class="text-xs text-slate-500">HNSW Vector Index (Cosine &lt;=&gt;)</span>
-      </div>
-      <form onsubmit="runSearch(event)" class="flex gap-3">
-        <input id="searchInput" type="text" placeholder="Search by meaning: e.g. 'morning coffee', 'airport cab ride', 'electricity bill', or 'stolen card FAQ'..."
-          class="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-blue-500" />
-        <button type="submit" class="bg-blue-600 hover:bg-blue-500 px-6 py-2.5 rounded-lg font-semibold text-sm transition">Vector Search</button>
-      </form>
-      <div id="searchResults" class="mt-4 space-y-2">
-        <p class="text-slate-500 text-sm">Type a search query above and press "Vector Search" to test pgvector semantic matching.</p>
-      </div>
-    </div>
-
-    <!-- 2. Charts & 3. Real-Time Fraud Alerts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <!-- Spending Analytics Chart -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col justify-between">
-        <div>
-          <h2 class="text-lg font-semibold text-emerald-400 mb-1">2. Spending Analytics</h2>
-          <p class="text-xs text-slate-400 mb-4">MongoDB Aggregation Pipeline (`$group`, `$sum`, `$sort`)</p>
-        </div>
-        <div class="relative min-h-[220px]">
-          <canvas id="spendingChart" height="200"></canvas>
-        </div>
       </div>
     </div>
 
@@ -722,15 +622,6 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       <div class="flex justify-between items-center border-b border-slate-800 pb-2">
         <h3 class="text-sm font-bold text-white">Open Bank Account</h3>
         <button onclick="closeNewAccountModal()" class="text-slate-400 hover:text-white">✕</button>
-      <!-- Real-Time Fraud Alerts Panel -->
-      <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg flex flex-col">
-        <div>
-          <h2 class="text-lg font-semibold text-rose-400 mb-1">3. Real-Time Fraud Alerts Panel</h2>
-          <p class="text-xs text-slate-400 mb-4">Indexed Collection: `fraud_alerts`</p>
-        </div>
-        <div id="fraudList" class="space-y-3 max-h-72 overflow-y-auto pr-1 flex-1">
-          <p class="text-slate-500 text-sm">Loading alerts...</p>
-        </div>
       </div>
       <form onsubmit="handleOpenAccount(event)" class="space-y-3 text-xs">
         <div>
@@ -758,28 +649,25 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       </div>
       <form onsubmit="handleApplyLoan(event)" class="space-y-3 text-xs">
         <div>
-          <label class="block text-slate-400 mb-1">Principal Amount (₹)</label>
-          <input id="applyLoanAmount" type="number" step="1000" min="10000" max="5000000" value="350000" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+          <label class="block text-slate-400 mb-1">Requested Principal (₹)</label>
+          <input id="loanReqAmount" type="number" step="1000" min="10000" max="5000000" value="250000" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-slate-400 mb-1">Tenure (Months)</label>
-            <input id="applyLoanTenure" type="number" min="6" max="120" value="24" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
+            <label class="block text-slate-400 mb-1">Interest Rate (%)</label>
+            <input id="loanReqRate" type="number" step="0.1" value="8.5" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           </div>
           <div>
-            <label class="block text-slate-400 mb-1">Annual Rate (%)</label>
-            <input type="text" value="8.50%" readonly class="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-slate-400 font-mono" />
+            <label class="block text-slate-400 mb-1">Tenure (Months)</label>
+            <input id="loanReqTenure" type="number" value="24" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono" />
           </div>
+        </div>
+        <div>
+          <label class="block text-slate-400 mb-1">Purpose / End-Use</label>
+          <input id="loanReqPurpose" type="text" placeholder="e.g. Home Renovation, Education" required class="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white" />
         </div>
         <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs uppercase">Submit Loan Application</button>
       </form>
-    <!-- Recent Login Events (`login_events`) -->
-    <div class="bg-slate-900 border border-slate-800 rounded-xl p-5 shadow-lg">
-      <h2 class="text-lg font-semibold text-amber-400 mb-1">4. Security Login Audit Trail</h2>
-      <p class="text-xs text-slate-400 mb-3">Audited Events Collection: `login_events` (Triggers brute-force alerts on 3+ consecutive failures)</p>
-      <div id="loginList" class="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
-        <p class="text-slate-500 text-sm col-span-3">Loading login trail...</p>
-      </div>
     </div>
   </div>
 
@@ -787,6 +675,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     let authToken = localStorage.getItem('sb_token') || null;
     let currentUser = null;
     let myAccounts = [];
+    let currentTransactionsList = [];
 
     function showToast(title, msg, type = 'success') {
       const container = document.getElementById('toastContainer');
@@ -876,7 +765,8 @@ CUSTOMER_HTML = """<!DOCTYPE html>
         const txRes = await fetch('/transactions/me', { headers: { 'Authorization': `Bearer ${token}` } });
         if (txRes.ok) {
           const txData = await txRes.json();
-          renderTransactions(txData.transactions || []);
+          currentTransactionsList = txData.transactions || [];
+          renderTransactions(currentTransactionsList);
         }
 
         // Loans
@@ -935,8 +825,6 @@ CUSTOMER_HTML = """<!DOCTYPE html>
         }
       } catch (e) {}
     }
-
-    let currentTransactionsList = [];
 
     function renderTransactions(txs) {
       currentTransactionsList = txs || [];
@@ -1032,10 +920,20 @@ CUSTOMER_HTML = """<!DOCTYPE html>
     async function generateTransactionPDF() {
       const btn = document.getElementById('pdfDownloadBtn');
       const originalHtml = btn.innerHTML;
-      btn.innerHTML = `<svg class="w-4 h-4 animate-spin inline-block mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Generating PDF...`;
+      btn.innerHTML = `<svg class="w-4 h-4 animate-spin inline-block mr-1" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> Fetching All Transactions & Generating PDF...`;
       btn.disabled = true;
 
       try {
+        // Fetch ALL user transactions to guarantee complete statement download
+        const token = localStorage.getItem('sb_token');
+        if (token) {
+          const allTxRes = await fetch('/transactions/me?limit=1000', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (allTxRes.ok) {
+            const allTxData = await allTxRes.json();
+            currentTransactionsList = allTxData.transactions || currentTransactionsList;
+          }
+        }
+
         populateStatementSheet();
         const area = document.getElementById('printableStatementArea');
         area.classList.remove('hidden');
@@ -1051,7 +949,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
             jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
           };
           await html2pdf().set(opt).from(document.getElementById('statementSheet')).save();
-          showToast('Statement Downloaded', `Successfully generated ${filename}`, 'success');
+          showToast('Statement Downloaded', `Generated complete statement with ${currentTransactionsList.length} transactions.`, 'success');
         } else {
           window.print();
         }
@@ -1066,7 +964,18 @@ CUSTOMER_HTML = """<!DOCTYPE html>
       }
     }
 
-    function printOnlyStatement() {
+    async function printOnlyStatement() {
+      const token = localStorage.getItem('sb_token');
+      if (token) {
+        try {
+          const allTxRes = await fetch('/transactions/me?limit=1000', { headers: { 'Authorization': `Bearer ${token}` } });
+          if (allTxRes.ok) {
+            const allTxData = await allTxRes.json();
+            currentTransactionsList = allTxData.transactions || currentTransactionsList;
+          }
+        } catch (e) {}
+      }
+
       populateStatementSheet();
       const area = document.getElementById('printableStatementArea');
       area.classList.remove('hidden');
@@ -1151,17 +1060,16 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({
             account_type: document.getElementById('newAccountType').value,
-            initial_balance: parseFloat(document.getElementById('newAccountDeposit').value) || 0,
-            currency: 'INR'
+            initial_deposit: parseFloat(document.getElementById('newAccountDeposit').value) || 0.0
           })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Failed');
-        showToast('Success', 'Account opened successfully!', 'success');
+        if (!res.ok) throw new Error(data.detail || 'Failed to open account');
+        showToast('Account Opened', `Account ${data.account_number} created!`);
         closeNewAccountModal();
         await loadCustomerPortal();
-      } catch (err) {
-        showToast('Error', err.message, 'error');
+      } catch (e) {
+        showToast('Error', e.message, 'error');
       }
     }
 
@@ -1173,24 +1081,25 @@ CUSTOMER_HTML = """<!DOCTYPE html>
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
           body: JSON.stringify({
-            loan_amount: parseFloat(document.getElementById('applyLoanAmount').value),
-            interest_rate: 8.5,
-            tenure_months: parseInt(document.getElementById('applyLoanTenure').value)
+            loan_amount: parseFloat(document.getElementById('loanReqAmount').value),
+            interest_rate: parseFloat(document.getElementById('loanReqRate').value),
+            tenure_months: parseInt(document.getElementById('loanReqTenure').value),
+            purpose: document.getElementById('loanReqPurpose').value
           })
         });
         const data = await res.json();
-        if (!res.ok) throw new Error(data.detail || 'Failed');
-        showToast('Loan Submitted', 'Loan request submitted for underwriting!', 'success');
+        if (!res.ok) throw new Error(data.detail || 'Loan application failed');
+        showToast('Application Submitted', `Application #${data.loan_id} under underwriting.`);
         closeApplyLoanModal();
         await loadCustomerPortal();
-      } catch (err) {
-        showToast('Error', err.message, 'error');
+      } catch (e) {
+        showToast('Error', e.message, 'error');
       }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      recalcEMI();
       loadCustomerPortal();
+      recalcEMI();
     });
   </script>
 </body>
@@ -1198,7 +1107,7 @@ CUSTOMER_HTML = """<!DOCTYPE html>
 """
 
 # ==============================================================================
-# 3. DEDICATED BANK ADMIN & FRAUD PORTAL (/admin)
+# 3. DEDICATED BANK ADMIN & FRAUD INTELLIGENCE CENTER (/admin)
 # ==============================================================================
 ADMIN_HTML = """<!DOCTYPE html>
 <html lang="en">
@@ -1207,7 +1116,6 @@ ADMIN_HTML = """<!DOCTYPE html>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bank Management & Risk Center — SecureBank</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1225,29 +1133,37 @@ ADMIN_HTML = """<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex flex-col">
 
-  <!-- Top Navbar -->
-  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 lg:px-8 py-3.5">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+  <!-- Top Navbar - Full Width Screen -->
+  <header class="sticky top-0 z-40 bg-slate-950/95 backdrop-blur-md border-b border-slate-800/80 px-4 sm:px-6 lg:px-10 py-3.5">
+    <div class="w-full flex items-center justify-between gap-4">
       
       <!-- Brand -->
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-purple-500 to-indigo-500 flex items-center justify-center shadow-lg shadow-purple-500/20">
-          <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+          <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2L2 7v3c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 18c-4.41-1.12-7-5.52-7-9.88V8.3l7-3.5 7 3.5v1.82c0 4.36-2.59 8.76-7 9.88z"/>
+          </svg>
         </div>
         <div>
           <span class="text-lg font-bold text-white">Secure<span class="text-purple-400">Bank</span></span>
-          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 font-mono ml-2">Staff & Risk Center</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-400 border border-purple-500/20 font-mono ml-2">Admin Risk Desk</span>
         </div>
       </div>
 
-      <!-- Officer & Logout -->
+      <!-- Controls & Logout -->
       <div class="flex items-center gap-3">
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
+        <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
           <div class="w-2 h-2 rounded-full bg-purple-400 animate-pulse"></div>
-          <span class="font-bold text-slate-200">Officer: admin</span>
-          <span class="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 font-bold">Admin</span>
+          <span class="font-bold text-slate-200">Bank Risk Office</span>
+          <span class="text-[10px] font-mono uppercase px-1.5 py-0.2 rounded bg-purple-950 text-purple-300">Staff</span>
         </div>
-        <button onclick="logout()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
+
+        <button onclick="triggerSync()" class="px-3 py-1.5 text-xs font-semibold rounded-xl bg-purple-950 hover:bg-purple-900 text-purple-300 border border-purple-800 flex items-center gap-1.5 transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          Sync Outbox
+        </button>
+
+        <button onclick="logout()" class="px-3.5 py-1.5 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 transition">
           Sign Out
         </button>
       </div>
@@ -1255,90 +1171,104 @@ ADMIN_HTML = """<!DOCTYPE html>
     </div>
   </header>
 
-  <!-- Toast Container -->
+  <!-- Toast Notification Container -->
   <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
 
-  <!-- Main Admin Portal -->
-  <main class="flex-1 max-w-7xl mx-auto w-full p-4 lg:p-8 space-y-8">
+  <!-- Main Content - Fits Whole Laptop Screen -->
+  <main class="flex-1 w-full px-4 sm:px-6 lg:px-10 xl:px-12 py-6 space-y-8">
     
-    <!-- Executive KPI Grid -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-      <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-emerald-500 shadow-lg">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Deposits (AUM)</span>
-        <span id="kpiAUM" class="text-2xl font-bold text-white font-mono mt-1 block">₹0.00</span>
-        <span class="text-[10px] text-emerald-400 font-mono mt-1 block">PostgreSQL Core</span>
+    <!-- Top Bar -->
+    <div class="flex flex-wrap justify-between items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-white">Bank Administration & Risk Supervision</h1>
+        <p class="text-xs text-slate-400 mt-1">Dual-Engine Supervision • PostgreSQL ACID Banking Core • MongoDB Risk Quarantine</p>
       </div>
-      <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-blue-500 shadow-lg">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Active Accounts</span>
-        <span id="kpiAccounts" class="text-2xl font-bold text-white font-mono mt-1 block">0</span>
-        <span class="text-[10px] text-blue-400 font-mono mt-1 block">Custody Units</span>
-      </div>
-      <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-purple-500 shadow-lg">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Ledger Transfers</span>
-        <span id="kpiTransfers" class="text-2xl font-bold text-white font-mono mt-1 block">0</span>
-        <span class="text-[10px] text-purple-400 font-mono mt-1 block">ACID Ledger Rows</span>
-      </div>
-      <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-rose-500 shadow-lg">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Open Fraud Alerts</span>
-        <span id="kpiAlerts" class="text-2xl font-bold text-rose-400 font-mono mt-1 block">0</span>
-        <span class="text-[10px] text-rose-400 font-mono mt-1 block">MongoDB Real-Time</span>
-      </div>
-      <div class="glass-panel p-5 rounded-2xl border-l-4 border-l-amber-500 shadow-lg">
-        <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block">Pending Outbox</span>
-        <span id="kpiOutbox" class="text-2xl font-bold text-amber-400 font-mono mt-1 block">0</span>
-        <button onclick="triggerSync()" class="text-[10px] font-bold text-amber-300 hover:text-white uppercase font-mono mt-1 block underline">Sync Outbox Now →</button>
+      <div class="flex items-center gap-2">
+        <button onclick="simulateFraud()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-rose-950 hover:bg-rose-900 text-rose-300 border border-rose-800 transition">
+          + Simulate Fraud Transfer
+        </button>
+        <button onclick="triggerSync()" class="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 transition">
+          Sync Outbox Events
+        </button>
       </div>
     </div>
 
-    <!-- Loan Underwriting Queue -->
+    <!-- Executive KPI Ribbon (5 Metrics) -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+        <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Total Deposits (AUM)</span>
+        <span id="kpiAUM" class="text-xl font-black text-emerald-400 font-mono mt-1 block">₹0.00</span>
+      </div>
+      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+        <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Active Accounts</span>
+        <span id="kpiAccounts" class="text-xl font-black text-white font-mono mt-1 block">0</span>
+      </div>
+      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+        <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Total Transfers</span>
+        <span id="kpiTransfers" class="text-xl font-black text-cyan-400 font-mono mt-1 block">0</span>
+      </div>
+      <div class="glass-panel rounded-2xl p-4 shadow-lg">
+        <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Open Fraud Alerts</span>
+        <span id="kpiAlerts" class="text-xl font-black text-rose-400 font-mono mt-1 block">0</span>
+      </div>
+      <div class="glass-panel rounded-2xl p-4 shadow-lg col-span-2 md:col-span-1">
+        <span class="text-[10px] uppercase font-mono text-slate-400 block font-semibold">Pending Outbox</span>
+        <span id="kpiOutbox" class="text-xl font-black text-purple-400 font-mono mt-1 block">0</span>
+      </div>
+    </div>
+
+    <!-- Loan Underwriting & Approval Center -->
     <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
       <div class="flex justify-between items-center border-b border-slate-800 pb-3">
         <div>
           <h2 class="text-base font-bold text-white flex items-center gap-2">
-            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-            Customer Loan Applications & Underwriting Queue
+            <svg class="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            Loan Underwriting & Portfolio Supervision
           </h2>
-          <p class="text-xs text-slate-400">Execute credit decisions via stored procedure <code class="text-amber-300">public.update_loan_status</code></p>
+          <p class="text-xs text-slate-400">Review pending credit facilities, evaluate interest spreads, and execute underwriting decisions</p>
         </div>
-        <button onclick="loadAdminPortal()" class="px-3 py-1 rounded-lg bg-slate-800 text-xs text-slate-300 hover:bg-slate-700">Refresh</button>
+        <span class="text-xs font-mono text-slate-400">Role: Admin Authority</span>
       </div>
+
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-950 text-slate-400 uppercase font-mono border-b border-slate-800">
             <tr>
               <th class="py-2.5 px-3">Loan ID</th>
-              <th class="py-2.5 px-3">Customer User ID</th>
-              <th class="py-2.5 px-3">Principal Amount</th>
-              <th class="py-2.5 px-3">Interest Rate</th>
-              <th class="py-2.5 px-3">Est. Monthly EMI</th>
+              <th class="py-2.5 px-3">Customer</th>
+              <th class="py-2.5 px-3">Principal (₹)</th>
+              <th class="py-2.5 px-3">Rate / Tenure</th>
+              <th class="py-2.5 px-3">Purpose</th>
               <th class="py-2.5 px-3">Status</th>
-              <th class="py-2.5 px-3 text-right">Officer Decision</th>
+              <th class="py-2.5 px-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody id="loanTableBody" class="divide-y divide-slate-800 font-mono"></tbody>
+          <tbody id="loanTableBody" class="divide-y divide-slate-800 font-mono">
+            <tr><td colspan="7" class="text-center py-4 text-slate-500">Loading loan requests...</td></tr>
+          </tbody>
         </table>
       </div>
     </div>
 
-    <!-- Real-Time Fraud Alerts Queue & MongoDB Analytics -->
+    <!-- Fraud Quarantine & Spending Analytics -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       
-      <!-- Fraud Alerts Queue -->
-      <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4 flex flex-col">
+      <!-- Real-Time Fraud Quarantine -->
+      <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <div>
             <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-              Real-Time Fraud Alerts Queue
+              <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+              Real-Time Fraud Quarantine & AML Desk
             </h2>
-            <p class="text-xs text-slate-400">MongoDB `fraud_alerts` collection with velocity rules</p>
+            <p class="text-xs text-slate-400">Replicated to MongoDB <code class="text-rose-300">fraud_alerts</code></p>
           </div>
-          <button onclick="simulateFraud()" class="px-2.5 py-1 rounded bg-rose-950 border border-rose-800 text-[10px] text-rose-300 font-bold hover:bg-rose-900">+ Simulate Test Alert</button>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-950 text-rose-400 border border-rose-800">High Risk Stream</span>
         </div>
-        <div id="fraudList" class="space-y-3 overflow-y-auto max-h-72 flex-1 pr-1"></div>
+        <div id="fraudList" class="space-y-3 overflow-y-auto max-h-72 pr-1"></div>
       </div>
 
-      <!-- MongoDB Aggregation Spending Chart -->
+      <!-- Razor-Sharp Vector Spending Analytics (MongoDB Aggregation) -->
       <div class="glass-panel rounded-2xl p-6 shadow-xl space-y-4">
         <div class="flex justify-between items-center border-b border-slate-800 pb-3">
           <div>
@@ -1350,9 +1280,8 @@ ADMIN_HTML = """<!DOCTYPE html>
           </div>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Live Mongo Data</span>
         </div>
-        <div id="chartContainer" class="h-72 relative">
-          <!-- Razor-sharp vector chart container -->
-        </div>
+        <!-- Pure Vector Bar Chart Container: Razor sharp on all DPI displays -->
+        <div id="chartContainer" class="h-72 relative"></div>
       </div>
 
     </div>
@@ -1383,8 +1312,6 @@ ADMIN_HTML = """<!DOCTYPE html>
   </main>
 
   <script>
-    let chartInstance = null;
-
     function showToast(title, msg, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
@@ -1465,41 +1392,49 @@ ADMIN_HTML = """<!DOCTYPE html>
         return `
           <tr class="hover:bg-slate-900/60">
             <td class="py-2.5 px-3 font-bold text-slate-300">#${l.loan_id}</td>
-            <td class="py-2.5 px-3 text-slate-400">User #${l.user_id}</td>
+            <td class="py-2.5 px-3 font-medium text-white">${l.applicant_username || 'User #' + l.user_id}</td>
             <td class="py-2.5 px-3 font-bold text-amber-400">₹${parseFloat(l.loan_amount).toLocaleString()}</td>
-            <td class="py-2.5 px-3 text-slate-300">${l.interest_rate}</td>
-            <td class="py-2.5 px-3 text-emerald-400">₹${parseFloat(l.monthly_emi).toLocaleString()}/mo</td>
+            <td class="py-2.5 px-3 text-slate-400">${l.interest_rate}% • ${l.tenure_months}m</td>
+            <td class="py-2.5 px-3 text-slate-300">${l.purpose}</td>
             <td class="py-2.5 px-3">
-              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.status === 'Active' ? 'bg-emerald-950 text-emerald-300' : l.status === 'Approved' ? 'bg-blue-950 text-blue-300' : 'bg-amber-950 text-amber-300'}">${l.status}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${l.status === 'Active' ? 'bg-emerald-950 text-emerald-300' : (l.status === 'Rejected' ? 'bg-rose-950 text-rose-300' : 'bg-amber-950 text-amber-300')}">
+                ${l.status}
+              </span>
             </td>
             <td class="py-2.5 px-3 text-right">
               ${isPending ? `
-                <button onclick="decideLoan(${l.loan_id}, 'Approved')" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px] mr-1">Approve</button>
-                <button onclick="decideLoan(${l.loan_id}, 'Rejected')" class="px-2 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold text-[10px]">Reject</button>
-              ` : `<span class="text-[10px] text-slate-500 font-sans">Resolved</span>`}
+                <div class="flex justify-end gap-1.5">
+                  <button onclick="reviewLoan(${l.loan_id}, 'Active')" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[10px]">Approve</button>
+                  <button onclick="reviewLoan(${l.loan_id}, 'Rejected')" class="px-2 py-1 rounded bg-rose-600 hover:bg-rose-500 text-white font-bold text-[10px]">Reject</button>
+                </div>
+              ` : `<span class="text-[10px] text-slate-500 font-mono">Processed</span>`}
             </td>
           </tr>
         `;
       }).join('');
     }
 
-    async function decideLoan(id, decision) {
+    async function reviewLoan(id, decision) {
       const token = localStorage.getItem('sb_token');
       try {
-        const res = await fetch(`/loans/${id}/status`, {
+        const res = await fetch(`/loans/admin/${id}/review`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-          body: JSON.stringify({ status: decision })
+          body: JSON.stringify({ decision: decision, notes: `Reviewed by Bank Staff` })
         });
+        const data = await res.json();
         if (res.ok) {
-          showToast('Underwriting Complete', `Loan #${id} marked as ${decision}.`, 'success');
+          showToast('Decision Recorded', `Loan #${id} marked as ${decision}.`);
           await loadAdminPortal();
+        } else {
+          showToast('Error', data.detail || 'Action failed.');
         }
       } catch (e) {
         showToast('Error', e.message);
       }
     }
 
+    // Razor-Sharp Vector Chart Rendering (Pure HTML/CSS/SVG - No canvas raster blur)
     function renderChart(spending) {
       const container = document.getElementById('chartContainer');
       if (!container) return;
@@ -1515,7 +1450,7 @@ ADMIN_HTML = """<!DOCTYPE html>
       }
 
       const items = spending.map(i => ({
-        name: (i.category || 'General').replace(/^\[(.*?)\]/, '$1').trim(),
+        name: (i.category || 'General').replace(/^\\[(.*?)\\]/, '$1').trim(),
         total: parseFloat(i.totalSpent) || 0
       }));
 
@@ -1614,33 +1549,12 @@ ADMIN_HTML = """<!DOCTYPE html>
             <div class="flex items-center gap-2">
               <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${a.severity === 'CRITICAL' ? 'bg-rose-950 text-rose-300' : 'bg-amber-950 text-amber-300'}">${a.severity}</span>
               <span class="font-bold text-white">${a.category}</span>
-              ${a.amount ? `<span class="font-mono text-rose-400 font-bold">₹${a.amount.toLocaleString()}</span>` : ''}
             </div>
-            <p class="text-slate-300 mt-1">${a.reason}</p>
+            <p class="text-slate-400 mt-1">${a.reason}</p>
           </div>
-          <div>
-            ${a.status !== 'RESOLVED' ? `
-              <button onclick="resolveAlert('${a.id}')" class="px-2 py-1 rounded bg-emerald-950 border border-emerald-800 text-emerald-300 text-[10px] font-bold hover:bg-emerald-900">Resolve</button>
-            ` : '<span class="text-[10px] text-emerald-400 font-bold font-mono">Resolved</span>'}
-          </div>
+          <span class="font-bold font-mono text-rose-400">₹${parseFloat(a.amount).toLocaleString()}</span>
         </div>
       `).join('');
-    }
-
-    async function resolveAlert(id) {
-      try {
-        const res = await fetch(`/api/person-b/fraud/alerts/${id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ status: 'RESOLVED' })
-        });
-        if (res.ok) {
-          showToast('Alert Resolved', 'Marked alert as resolved.');
-          await loadAdminPortal();
-        }
-      } catch (e) {
-        showToast('Error', e.message);
-      }
     }
 
     function renderAccountsList(accounts) {
@@ -1693,219 +1607,6 @@ ADMIN_HTML = """<!DOCTYPE html>
           <span class="text-[10px] font-bold px-1.5 py-0.5 rounded ${l.status === 'FAILED' ? 'bg-rose-950 text-rose-300' : 'bg-emerald-950 text-emerald-300'}">${l.status}</span>
         </div>
       `).join('');
-    function showToast(message, type = 'info') {
-      const banner = document.getElementById('toastBanner');
-      banner.className = 'p-3.5 rounded-lg border text-sm transition';
-      if (type === 'success') {
-        banner.className += ' bg-emerald-950/60 border-emerald-700 text-emerald-200';
-      } else if (type === 'error') {
-        banner.className += ' bg-rose-950/60 border-rose-700 text-rose-200';
-      } else if (type === 'warning') {
-        banner.className += ' bg-amber-950/60 border-amber-700 text-amber-200';
-      } else {
-        banner.className += ' bg-blue-950/60 border-blue-700 text-blue-200';
-      }
-      banner.textContent = message;
-      banner.classList.remove('hidden');
-      setTimeout(() => { banner.classList.add('hidden'); }, 6000);
-    }
-
-    async function checkHealth() {
-      try {
-        const pgRes = await fetch('/health/postgres');
-        const pgData = await pgRes.json();
-        const pgEl = document.getElementById('pgStatus');
-        if (pgData.status === 'healthy') {
-          pgEl.textContent = '● Online';
-          pgEl.className = 'font-semibold text-emerald-400';
-        } else {
-          pgEl.textContent = '○ Offline';
-          pgEl.className = 'font-semibold text-amber-400';
-        }
-      } catch {
-        const pgEl = document.getElementById('pgStatus');
-        pgEl.textContent = '○ Disconnected';
-        pgEl.className = 'font-semibold text-rose-400';
-      }
-
-      try {
-        const mRes = await fetch('/health/mongodb');
-        const mData = await mRes.json();
-        const mEl = document.getElementById('mongoStatus');
-        if (mData.status === 'healthy') {
-          mEl.textContent = '● Online';
-          mEl.className = 'font-semibold text-emerald-400';
-        } else {
-          mEl.textContent = '○ Offline';
-          mEl.className = 'font-semibold text-amber-400';
-        }
-      } catch {
-        const mEl = document.getElementById('mongoStatus');
-        mEl.textContent = '○ Disconnected';
-        mEl.className = 'font-semibold text-rose-400';
-      }
-    }
-
-    async function loadDashboard(suppressToast = false) {
-      await checkHealth();
-
-      try {
-        const res = await fetch('/api/person-b/analytics/spending');
-        const data = await res.json();
-
-        const spending = (data && Array.isArray(data.spendingByCategory)) ? data.spendingByCategory : [];
-        const labels = spending.map(i => i.category);
-        const values = spending.map(i => i.totalSpent);
-
-        // Render Chart
-        const ctx = document.getElementById('spendingChart').getContext('2d');
-        if (chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(ctx, {
-          type: 'bar',
-          data: {
-            labels: labels.length ? labels : ['No Transactions Yet'],
-            datasets: [{
-              label: 'Total Volume (INR ₹)',
-              data: values.length ? values : [0],
-              backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6']
-            }]
-          },
-          options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#cbd5e1' } } },
-            scales: {
-              x: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } },
-              y: { ticks: { color: '#94a3b8' }, grid: { color: '#1e293b' } }
-            }
-          }
-        });
-
-        // Render Fraud Alerts
-        const fraudContainer = document.getElementById('fraudList');
-        const alerts = (data && Array.isArray(data.fraudAlerts)) ? data.fraudAlerts : [];
-        if (alerts.length === 0) {
-          fraudContainer.innerHTML = '<p class="text-slate-500 text-sm">No active fraud alerts. Click "+ Trigger Fraud Alert" above to test real-time detection.</p>';
-        } else {
-          fraudContainer.innerHTML = alerts.map(a => `
-            <div class="p-3 rounded-lg bg-rose-950/40 border border-rose-800/80 flex justify-between items-start gap-3">
-              <div>
-                <span class="text-xs font-bold px-2 py-0.5 rounded bg-rose-600 text-white">${a.severity}</span>
-                <span class="ml-2 font-semibold text-rose-200">${a.category || 'Alert'} — ₹${(a.amount || 0).toLocaleString()}</span>
-                <p class="text-xs text-slate-300 mt-1">${a.reason || 'Flagged by rules engine'}</p>
-              </div>
-              <span class="text-xs text-slate-400 font-mono">${a.status || 'OPEN'}</span>
-            </div>
-          `).join('');
-        }
-
-        // Render Login Events
-        const loginContainer = document.getElementById('loginList');
-        const logins = (data && Array.isArray(data.loginEvents)) ? data.loginEvents : [];
-        if (logins.length === 0) {
-          loginContainer.innerHTML = '<p class="text-slate-500 text-sm col-span-3">No login events recorded yet. Click "+ Simulate Failed Login" to test.</p>';
-        } else {
-          loginContainer.innerHTML = logins.map(l => `
-            <div class="p-3 rounded-lg bg-slate-950 border border-slate-800">
-              <p class="font-medium text-slate-200 truncate">${l.email || 'user'}</p>
-              <p class="text-xs mt-1 ${l.status === 'FAILED' ? 'text-rose-400 font-bold' : 'text-emerald-400'}">
-                Status: ${l.status} • IP: ${l.ip_address || '127.0.0.1'}
-              </p>
-            </div>
-          `).join('');
-        }
-
-        if (!suppressToast && data && data.message) {
-          showToast(data.message, 'warning');
-        }
-      } catch (err) {
-        console.error("Dashboard load failed:", err);
-        if (!suppressToast) {
-          showToast("Notice: MongoDB is currently offline or unreachable. Live analytics will populate once MongoDB is running.", 'warning');
-        }
-      }
-    }
-
-    async function simulateTx(amount, category, description) {
-      try {
-        const res = await fetch('/api/person-b/fraud/evaluate', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: 1, amount, category, description })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          if (data.fraud_triggered) {
-            showToast(`⚠️ Fraud Alert Generated: ${data.reason}`, 'warning');
-          } else {
-            showToast(`✓ Transaction of ₹${amount.toLocaleString()} processed successfully.`, 'success');
-          }
-        } else {
-          showToast(`Simulation notice: ${data.detail || 'Service unavailable'}`, 'error');
-        }
-      } catch (err) {
-        showToast(`Simulation network error: ${err.message}`, 'error');
-      }
-      loadDashboard(true);
-    }
-
-    async function simulateFailedLogin() {
-      try {
-        const res = await fetch('/api/person-b/login-events', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ user_id: 1, email: 'customer@securebank.com', ip_address: '192.168.1.99', status: 'FAILED' })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          showToast('Failed login event logged to MongoDB security audit trail.', 'info');
-        } else {
-          showToast(`Login log notice: ${data.detail || 'Service unavailable'}`, 'error');
-        }
-      } catch (err) {
-        showToast(`Failed login network error: ${err.message}`, 'error');
-      }
-      loadDashboard(true);
-    }
-
-    async function runSearch(e) {
-      e.preventDefault();
-      const q = document.getElementById('searchInput').value.trim() || 'coffee';
-      const box = document.getElementById('searchResults');
-      box.innerHTML = '<p class="text-blue-400 text-sm">Searching vector embeddings...</p>';
-
-      try {
-        const res = await fetch('/api/person-b/semantic-search?q=' + encodeURIComponent(q));
-        const data = await res.json();
-
-        if (!res.ok) {
-          box.innerHTML = `<div class="p-3 bg-amber-950/40 border border-amber-800 rounded-lg text-amber-300 text-sm">Semantic search notice: ${data.detail || 'PostgreSQL pgvector service is not reachable.'}</div>`;
-          return;
-        }
-
-        const results = (data && Array.isArray(data.results)) ? data.results : [];
-        if (results.length === 0) {
-          box.innerHTML = '<p class="text-slate-400 text-sm">No matches found for this query.</p>';
-          return;
-        }
-
-        box.innerHTML = results.map(r => `
-          <div class="p-3 bg-slate-950 border border-slate-800 rounded-lg flex justify-between items-center gap-4">
-            <div>
-              <span class="text-xs font-bold px-2 py-0.5 rounded ${r.item_type === 'FAQ' ? 'bg-purple-700' : 'bg-blue-700'}">${r.item_type}</span>
-              <span class="ml-2 font-semibold text-white">${r.title}</span>
-              <span class="text-xs text-slate-400 ml-2">(${r.category})</span>
-              <p class="text-xs text-slate-300 mt-1">${r.description}</p>
-            </div>
-            <div class="text-right whitespace-nowrap">
-              ${r.amount ? `<p class="font-bold text-emerald-400">₹${r.amount.toLocaleString()}</p>` : ''}
-              <p class="text-xs text-blue-400 font-mono">Similarity: ${(r.similarity * 100).toFixed(1)}%</p>
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        box.innerHTML = `<div class="p-3 bg-rose-950/40 border border-rose-800 rounded-lg text-rose-300 text-sm">Search error: ${err.message}</div>`;
-      }
     }
 
     async function triggerSync() {
@@ -1959,7 +1660,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
 </head>
 <body class="min-h-screen flex flex-col justify-between p-4 sm:p-8">
 
-  <header class="max-w-6xl mx-auto w-full flex justify-between items-center py-4 border-b border-slate-800">
+  <header class="w-full max-w-7xl mx-auto flex justify-between items-center py-4 border-b border-slate-800">
     <div class="flex items-center gap-3">
       <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-emerald-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20">
         <svg class="w-6 h-6 text-slate-950" fill="currentColor" viewBox="0 0 24 24">
@@ -1976,7 +1677,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     </a>
   </header>
 
-  <main class="max-w-5xl mx-auto w-full my-auto py-10 space-y-8">
+  <main class="w-full max-w-7xl mx-auto my-auto py-10 space-y-8">
     <div class="text-center space-y-2">
       <span class="text-xs font-mono font-bold text-emerald-400 uppercase tracking-widest px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">Dedicated Role Portals</span>
       <h2 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">Access Your Banking Environment</h2>
@@ -1993,7 +1694,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
         </div>
         <div>
           <h3 class="text-xl font-bold text-white">Customer Banking Portal</h3>
-          <p class="text-xs text-slate-400 mt-1">Multi-account balances, instant fund transfers, pgvector statement search, and loan calculator.</p>
+          <p class="text-xs text-slate-400 mt-1">Multi-account balances, instant fund transfers, PDF statement export, and EMI loan calculator.</p>
         </div>
         <div class="pt-2">
           <a href="/customer" class="block w-full py-3 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider text-center transition shadow-lg">
@@ -2022,7 +1723,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
     </div>
   </main>
 
-  <footer class="max-w-6xl mx-auto w-full text-center py-4 border-t border-slate-900 text-xs text-slate-500 font-mono">
+  <footer class="w-full max-w-7xl mx-auto text-center py-4 border-t border-slate-900 text-xs text-slate-500 font-mono">
     SecureBank Enterprise • Dual-Engine Architecture
   </footer>
 
