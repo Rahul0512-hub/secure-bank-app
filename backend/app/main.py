@@ -24,6 +24,8 @@ def root():
     return {
         "message": "Welcome to SecureBank API",
         "status": "running",
+        "docs_url": "/docs",
+        "dashboard_url": "/dashboard",
     }
 
 

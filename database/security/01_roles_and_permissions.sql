@@ -39,6 +39,16 @@ GRANT SELECT ON
     public.transactions
 TO securebank_app;
 
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'semantic_search_items'
+    ) THEN
+        GRANT SELECT ON public.semantic_search_items TO securebank_app;
+    END IF;
+END $$;
+
 -- 4. Transfer role: minimum permissions required
 --    by the transfer_funds function.
 
