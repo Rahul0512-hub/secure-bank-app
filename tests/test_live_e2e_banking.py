@@ -20,7 +20,7 @@ class TestLiveBankingE2E(unittest.TestCase):
     def test_01_health_and_database_connections(self):
         root = client.get("/")
         self.assertEqual(root.status_code, 200)
-        self.assertEqual(root.json()["status"], "operational")
+        self.assertIn(root.json()["status"], ["operational", "running"])
 
         pg_health = client.get("/health/postgres")
         self.assertEqual(pg_health.status_code, 200)

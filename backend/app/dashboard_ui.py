@@ -1968,7 +1968,7 @@ DASHBOARD_HTML = """<!DOCTYPE html>
       </div>
       <div>
         <h1 class="text-xl font-bold text-white tracking-tight">Secure<span class="text-emerald-400">Bank</span> Enterprise Core</h1>
-        <p class="text-xs text-slate-400">PostgreSQL ACID Core • MongoDB Outbox Replicator • pgvector</p>
+        <p class="text-xs text-slate-400">SecureBank Intelligence Center • PostgreSQL ACID Core • MongoDB Outbox Replicator</p>
       </div>
     </div>
     <a href="/login" class="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs uppercase tracking-wider transition">
@@ -2064,5 +2064,4 @@ def get_admin_page():
 @router.get("/dashboard", response_class=HTMLResponse)
 def get_banking_dashboard():
     """Gateway Portal that routes to Customer or Admin."""
-def get_person_b_dashboard():
     return DASHBOARD_HTML
