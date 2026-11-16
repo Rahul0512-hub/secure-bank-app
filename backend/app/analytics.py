@@ -68,6 +68,10 @@ def get_spending_analytics():
             amt = doc.get("total_amount", 0)
             if isinstance(amt, Decimal128):
                 amt = float(amt.to_decimal())
+            elif amt is None:
+                amt = 0.0
+            else:
+                amt = float(amt)
             audit_summary.append({
                 "category": doc["_id"] or "OTHER",
                 "totalSpent": round(float(amt), 2),
@@ -130,7 +134,7 @@ def evaluate_transaction_fraud(payload: SimulateEventRequest):
         now = datetime.now(timezone.utc)
 
         # 1. Insert into Rahul's transaction_audit_logs following his strict schema
-        tx_id = int(now.timestamp())
+        tx_id = int(now.timestamp() * 1000)
         audit_col.insert_one({
             "transaction_id": tx_id,
             "event_type": "TRANSFER_COMPLETED",
@@ -193,19 +197,23 @@ def record_login_event(payload: LoginEventRequest):
         login_col = get_login_events_collection(client)
         now = datetime.now(timezone.utc)
 
+        login_status = payload.status.upper() if payload.status else "SUCCESS"
+        if login_status not in ("SUCCESS", "FAILED", "LOCKED"):
+            login_status = "SUCCESS"
+
         login_col.insert_one({
             "user_id": payload.user_id,
             "email": payload.email,
             "ip_address": payload.ip_address,
             "user_agent": "SecureBank-Web-Dashboard",
-            "status": payload.status,
+            "status": login_status,
             "occurred_at": now,
         })
 
         # If 3+ failed logins recently, trigger a fraud alert!
-        if payload.status == "FAILED":
+        if login_status == "FAILED":
             recent_fails = login_col.count_documents({"email": payload.email, "status": "FAILED"})
-            if recent_fails >= 3:
+            if isinstance(recent_fails, int) and recent_fails >= 3:
                 get_fraud_alerts_collection(client).insert_one({
                     "transaction_id": None,
                     "user_id": payload.user_id or 0,

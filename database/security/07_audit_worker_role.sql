@@ -28,7 +28,7 @@ ALTER ROLE securebank_audit_worker_login LOGIN INHERIT;
 
 GRANT USAGE ON SCHEMA public TO securebank_audit_worker;
 
-GRANT SELECT (outbox_id, payload, created_at, delivered_at)
+GRANT SELECT (outbox_id, payload, created_at, delivered_at, attempts, last_error)
 ON public.transaction_audit_outbox
 TO securebank_audit_worker;
 

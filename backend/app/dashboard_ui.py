@@ -170,7 +170,7 @@ DASHBOARD_HTML = """
       }
     }
 
-    async function loadDashboard() {
+    async function loadDashboard(suppressToast = false) {
       await checkHealth();
 
       try {
@@ -239,12 +239,14 @@ DASHBOARD_HTML = """
           `).join('');
         }
 
-        if (data && data.message) {
+        if (!suppressToast && data && data.message) {
           showToast(data.message, 'warning');
         }
       } catch (err) {
         console.error("Dashboard load failed:", err);
-        showToast("Notice: MongoDB is currently offline or unreachable. Live analytics will populate once MongoDB is running.", 'warning');
+        if (!suppressToast) {
+          showToast("Notice: MongoDB is currently offline or unreachable. Live analytics will populate once MongoDB is running.", 'warning');
+        }
       }
     }
 
@@ -268,7 +270,7 @@ DASHBOARD_HTML = """
       } catch (err) {
         showToast(`Simulation network error: ${err.message}`, 'error');
       }
-      loadDashboard();
+      loadDashboard(true);
     }
 
     async function simulateFailedLogin() {
@@ -287,7 +289,7 @@ DASHBOARD_HTML = """
       } catch (err) {
         showToast(`Failed login network error: ${err.message}`, 'error');
       }
-      loadDashboard();
+      loadDashboard(true);
     }
 
     async function runSearch(e) {

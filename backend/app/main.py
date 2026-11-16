@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from backend.app.transactions import router as transactions_router
 from backend.app.accounts import router as accounts_router
 from backend.app.auth import router as auth_router
@@ -11,6 +12,14 @@ app = FastAPI(
     title="SecureBank API",
     description="Backend API for the SecureBank application",
     version="1.0.0",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(auth_router)

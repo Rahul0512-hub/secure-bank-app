@@ -138,6 +138,27 @@ class TestAnalyticsAndDashboardAPI(unittest.TestCase):
         self.assertEqual(response.json()["status"], "logged")
         self.assertTrue(mock_logins.insert_one.called)
 
+    @patch("backend.app.analytics.get_mongo_client")
+    def test_login_event_recording_normalizes_status(self, mock_get_client):
+        mock_client = MagicMock()
+        mock_get_client.return_value = mock_client
+        mock_logins = MagicMock()
+        mock_logins.count_documents.return_value = 1
+
+        with patch("backend.app.analytics.get_login_events_collection", return_value=mock_logins):
+            response = client.post(
+                "/api/person-b/login-events",
+                json={
+                    "user_id": 1,
+                    "email": "test@securebank.com",
+                    "ip_address": "192.168.1.1",
+                    "status": "failed",
+                },
+            )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_logins.insert_one.call_args[0][0]["status"], "FAILED")
+
     @patch("backend.app.analytics.get_postgres_connection")
     def test_semantic_search_with_mocked_results(self, mock_get_conn):
         mock_conn = MagicMock()

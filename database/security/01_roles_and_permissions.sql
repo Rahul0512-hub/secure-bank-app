@@ -64,6 +64,16 @@ GRANT USAGE, SELECT
 ON SEQUENCE public.transactions_transaction_id_seq
 TO securebank_transfer;
 
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables 
+        WHERE table_schema = 'public' AND table_name = 'transaction_audit_outbox'
+    ) THEN
+        GRANT INSERT ON public.transaction_audit_outbox TO securebank_transfer;
+    END IF;
+END $$;
+
 -- 5. Temporarily allow the transfer role to own
 --    the function in the public schema.
 
