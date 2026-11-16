@@ -5,10 +5,11 @@ pymongo
 python-dotenv
 
 # Authentication and password security
-pwdlib[argon2]==0.3.1
-PyJWT==2.15.1
+pwdlib[argon2]
+PyJWT
 
 # API testing
 httpx2==2.16.0
+pytest
 
 email-validator

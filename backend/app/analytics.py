@@ -107,7 +107,13 @@ def get_spending_analytics():
             "loginEvents": logins,
         }
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        return {
+            "spendingByCategory": [],
+            "fraudAlerts": [],
+            "loginEvents": [],
+            "status": "database_unavailable",
+            "message": f"MongoDB is currently offline or unreachable: {str(exc)}",
+        }
     finally:
         if client:
             client.close()
@@ -172,7 +178,7 @@ def evaluate_transaction_fraud(payload: SimulateEventRequest):
             "reason": reason,
         }
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=503, detail=f"MongoDB service unavailable: {str(exc)}")
     finally:
         if client:
             client.close()
@@ -213,7 +219,7 @@ def record_login_event(payload: LoginEventRequest):
 
         return {"status": "logged"}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=str(exc))
+        raise HTTPException(status_code=503, detail=f"MongoDB service unavailable: {str(exc)}")
     finally:
         if client:
             client.close()
@@ -250,4 +256,4 @@ def semantic_vector_search(q: str = Query(..., description="Natural language sea
                     })
                 return {"query": q, "results": results}
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=f"pgvector search error: {exc}")
+        raise HTTPException(status_code=503, detail=f"PostgreSQL pgvector search unavailable: {str(exc)}")

@@ -31,3 +31,11 @@ VALUES
 ('FAQ', 2, 'Security', 'Why was my high-value transfer flagged for fraud?', 'Transfers above 50,000 INR trigger real-time velocity and anomaly checks in our Fraud Engine.', NULL, '[0.01, 0.01, 0.10, 0.97]'),
 ('FAQ', 3, 'Payments', 'How do I increase my daily NEFT/IMPS transfer limit?', 'Navigate to Account Limits and verify with OTP to raise your daily transfer cap up to 5 Lakhs.', NULL, '[0.02, 0.05, 0.65, 0.75]')
 ON CONFLICT DO NOTHING;
+
+-- Grant read permission to application role if it exists
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'securebank_app') THEN
+        GRANT SELECT ON public.semantic_search_items TO securebank_app;
+    END IF;
+END $$;
