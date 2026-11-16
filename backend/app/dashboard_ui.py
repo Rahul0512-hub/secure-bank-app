@@ -1413,7 +1413,7 @@ ADMIN_HTML = """<!DOCTYPE html>
           </div>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">Live Mongo Data</span>
         </div>
-        <div class="h-64 relative">
+        <div class="h-72 relative">
           <canvas id="adminSpendingChart"></canvas>
         </div>
       </div>
@@ -1564,7 +1564,10 @@ ADMIN_HTML = """<!DOCTYPE html>
     }
 
     function renderChart(spending) {
-      const labels = spending.map(i => i.category);
+      const originalLabels = spending.map(i => {
+        let cat = (i.category || 'General').trim();
+        return cat.replace(/^\[(.*?)\]/, '$1').trim();
+      });
       const values = spending.map(i => i.totalSpent);
       const ctx = document.getElementById('adminSpendingChart').getContext('2d');
       if (chartInstance) chartInstance.destroy();
@@ -1572,21 +1575,63 @@ ADMIN_HTML = """<!DOCTYPE html>
       chartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: labels.length ? labels : ['No Data'],
+          labels: originalLabels.length ? originalLabels : ['No Data'],
           datasets: [{
             label: 'Total Spend (₹)',
             data: values.length ? values : [0],
-            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6'],
-            borderRadius: 6,
+            backgroundColor: ['#10b981', '#3b82f6', '#f59e0b', '#ec4899', '#8b5cf6', '#06b6d4'],
+            borderRadius: 8,
+            barPercentage: 0.55,
+            maxBarThickness: 56,
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#090d16',
+              borderColor: '#334155',
+              borderWidth: 1,
+              titleFont: { size: 12, family: "'Plus Jakarta Sans', sans-serif", weight: '700' },
+              bodyFont: { size: 12, family: "'JetBrains Mono', monospace" },
+              padding: 10,
+              callbacks: {
+                title: function(items) {
+                  return originalLabels[items[0].dataIndex] || '';
+                },
+                label: function(item) {
+                  return '  Total: ₹' + Number(item.raw).toLocaleString('en-IN', { minimumFractionDigits: 2 });
+                }
+              }
+            }
+          },
           scales: {
-            x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { display: false } },
-            y: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: '#1e293b' } }
+            x: {
+              ticks: {
+                color: '#cbd5e1',
+                font: { size: 11, family: "'Plus Jakarta Sans', sans-serif", weight: '600' },
+                maxRotation: 20,
+                minRotation: 0,
+                autoSkip: false,
+                callback: function(val, index) {
+                  const lbl = originalLabels[index] || '';
+                  return lbl.length > 15 ? lbl.slice(0, 13) + '…' : lbl;
+                }
+              },
+              grid: { display: false }
+            },
+            y: {
+              ticks: {
+                color: '#94a3b8',
+                font: { size: 10, family: "'JetBrains Mono', monospace" },
+                callback: function(val) {
+                  return '₹' + (val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val);
+                }
+              },
+              grid: { color: 'rgba(51, 65, 85, 0.4)' }
+            }
           }
         }
       });
