@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from decimal import Decimal
 
 import psycopg
@@ -5,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
 
 from backend.app.dependencies import get_current_user
+from backend.app.mongodb import get_fraud_alerts_collection, get_mongo_client
 from backend.app.postgres import get_postgres_connection
 
 
@@ -16,6 +18,7 @@ class TransferRequest(BaseModel):
     destination_account_id: int = Field(gt=0)
     amount: Decimal = Field(gt=0, max_digits=19, decimal_places=4)
     description: str | None = Field(default=None, max_length=500)
+    category: str | None = Field(default="Transfer", max_length=50)
 
 
 def require_customer(current_user: dict) -> None:
@@ -48,6 +51,45 @@ def format_transaction(row: tuple) -> dict:
         "status": transaction_status,
         "created_at": created_at,
     }
+
+
+def evaluate_transfer_fraud_and_alert(user_id: int, transaction_id: int, amount: float, category: str, description: str | None):
+    """Real-time fraud detection engine hooks."""
+    desc_clean = (description or "").lower()
+    cat_clean = (category or "").lower()
+
+    fraud_triggered = False
+    severity = "LOW"
+    reason = None
+
+    if amount >= 50000:
+        fraud_triggered = True
+        severity = "HIGH" if amount < 100000 else "CRITICAL"
+        reason = f"High-velocity transfer of ₹{amount:,.2f} exceeds ₹50,000 threshold"
+    elif any(k in desc_clean or k in cat_clean for k in ["crypto", "offshore", "gambling", "hawala"]):
+        fraud_triggered = True
+        severity = "HIGH"
+        reason = f"High-risk keyword pattern detected in payment memo: '{description}'"
+
+    if fraud_triggered:
+        try:
+            client = get_mongo_client()
+            fraud_col = get_fraud_alerts_collection(client)
+            fraud_col.insert_one({
+                "transaction_id": transaction_id,
+                "user_id": user_id,
+                "amount": float(amount),
+                "category": category,
+                "reason": reason,
+                "severity": severity,
+                "status": "OPEN",
+                "created_at": datetime.now(timezone.utc),
+            })
+            client.close()
+        except Exception:
+            pass
+
+    return fraud_triggered, severity, reason
 
 
 @router.get("/me")
@@ -111,6 +153,41 @@ def get_my_transactions(
         "total": total,
         "limit": limit,
         "offset": offset,
+    }
+
+
+@router.get("/stats")
+def get_transaction_stats(current_user: dict = Depends(get_current_user)):
+    """Summary of debits, credits, and transaction volume for customer."""
+    require_customer(current_user)
+    user_id = current_user["user_id"]
+
+    with get_postgres_connection() as connection:
+        sent_row = connection.execute(
+            """
+            SELECT COALESCE(SUM(t.amount), 0), COUNT(t.transaction_id)
+            FROM public.transactions t
+            JOIN public.accounts s ON s.account_id = t.source_account_id
+            WHERE s.user_id = %s;
+            """,
+            (user_id,)
+        ).fetchone()
+
+        received_row = connection.execute(
+            """
+            SELECT COALESCE(SUM(t.amount), 0), COUNT(t.transaction_id)
+            FROM public.transactions t
+            JOIN public.accounts d ON d.account_id = t.destination_account_id
+            WHERE d.user_id = %s;
+            """,
+            (user_id,)
+        ).fetchone()
+
+    return {
+        "total_sent": str(Decimal(sent_row[0])),
+        "sent_count": sent_row[1],
+        "total_received": str(Decimal(received_row[0])),
+        "received_count": received_row[1],
     }
 
 
@@ -237,8 +314,22 @@ def transfer_funds(
             detail="An unexpected database error occurred.",
         )
 
+    # Evaluate real-time fraud checks
+    fraud_flag, severity, reason = evaluate_transfer_fraud_and_alert(
+        user_id=user_id,
+        transaction_id=transaction_id,
+        amount=float(request.amount),
+        category=request.category or "Transfer",
+        description=request.description,
+    )
+
     return {
         "message": "Transfer completed successfully",
         "transaction_id": transaction_id,
         "status": "Completed",
+        "fraud_alert": {
+            "triggered": fraud_flag,
+            "severity": severity if fraud_flag else "NONE",
+            "reason": reason,
+        } if fraud_flag else None,
     }
